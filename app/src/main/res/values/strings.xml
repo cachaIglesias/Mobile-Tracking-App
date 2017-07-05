@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Mobile Tracking Service</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="cancel">Cancelar</string>
+    <string name="done">Continuar</string>
+    <integer name="mapZoom">10</integer>
+    <integer name="minTimePositionRefresh">200</integer>
+    <integer name="minDistancePositionRefresh">10</integer>
+</resources>
