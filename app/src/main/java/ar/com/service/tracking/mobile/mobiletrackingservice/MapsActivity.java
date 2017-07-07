@@ -1,13 +1,16 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -26,10 +29,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private double longitudeNetwork, latitudeNetwork;
+    GPSservice mService;
+    boolean mBound = false;
+
     private LocationManager locationManager;
-    private GoogleMap map;
     private PolylineOptions polylineOptions;
+    private GoogleMap map;
 
     private static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 1;
 
@@ -39,9 +44,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry",
             "WebOS","Ubuntu","Windows7","Max OS X"};
 
-//    String[] fromColumns = {"", ""};
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
 
-//    int[] toViews = {R.id.display_name, R.id.phone_number};
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            GPSbinder binder = (GPSbinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     /**
      * @method Inicia el ciclo de vida completo de la actividad. En este metodo se debe configurar el estado global de la actividad ya que es el primero en el ciclo de vida de la misma.
@@ -57,8 +76,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String title = "Atencion!";
         String explanationMessage = "Debe aceptar los permisos solicitados para un correcto funcionamiento de la aplicación";
         permissionHelper.verificarSiExistePermisoYSolicitarSiEsNecesario(this, permission, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST, title, explanationMessage);
-
-        // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
 
         // listView de ordenes
         ArrayAdapter adapter = new ArrayAdapter<>(this,
@@ -86,6 +103,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     // TODO: hacer algo cuando se tienen los permisos
+                    // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
+                    // Bind to LocalService
+                    Intent intent = new Intent(this, GPSservice.class);
+                    bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                    // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
+                    mService.setParameters(locationManager, polylineOptions, map);
+                    this.toggleNetworkUpdates();
 
                 } else {
 
@@ -118,34 +142,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(4).color(Color.RED);
 
-        this.toggleNetworkUpdates();
-
-        // SE AGREGA UN MARCADOR
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        // EFECTO DE ROTACION
-        // Flat markers will rotate when the map is rotated,
-        // and change perspective when the map is tilted.
-//        map.addMarker(new MarkerOptions()
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.direction_arrow))
-//                .position(mapCenter)
-//                .flat(true)
-//                .rotation(245));
-//
-//        CameraPosition cameraPosition = CameraPosition.builder()
-//                .target(mapCenter)
-//                .zoom(13)
-//                .bearing(90)
-//                .build();
-//
-//        // Animate the change in camera view over 2 seconds
-//        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),
-//                2000, null);
-
-
     }
 
     /**
@@ -171,59 +167,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-
     public void toggleNetworkUpdates() {
 
         if (!checkLocation())
             return;
 
-        boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (ACCESS_FINE_OK) {
-
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, locationListenerNetwork);
-            Toast.makeText(this, "Network provider started running", Toast.LENGTH_LONG).show();
-
-        }
+        mService.toggleNetworkUpdates();
 
     }
-
-    private final LocationListener locationListenerNetwork = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            longitudeNetwork = location.getLongitude();
-            latitudeNetwork = location.getLatitude();
-
-            LatLng centrar = new LatLng(latitudeNetwork, longitudeNetwork);
-            map.addMarker(new MarkerOptions().position(centrar).title("Yo"));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(centrar, 18));
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    // se agrega al polyline la nuevo posicion
-                    polylineOptions.add(new LatLng(latitudeNetwork, longitudeNetwork));
-                    map.addPolyline(polylineOptions);
-
-                    Toast.makeText(MapsActivity.this, "Network Provider update", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
 
     /**
      * @method Inicia el ciclo de vida visible de la actividad
@@ -268,6 +219,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onDestroy() {
         super.onDestroy();
         // TODO: va a servir para liberar el servicio de actualizacion de posiciones.
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     /**
