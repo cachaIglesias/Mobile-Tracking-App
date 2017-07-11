@@ -7,27 +7,25 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private static final String TAG = "MapsActivity";
 
     GPSservice mService;
     boolean mBound = false;
@@ -54,10 +52,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             GPSbinder binder = (GPSbinder) service;
             mService = binder.getService();
             mBound = true;
+//            if (mBound){
+                // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
+                mService.setParameters(locationManager, polylineOptions, map);
+                toggleNetworkUpdates();
+//            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.e(TAG, "onServiceDisconnected");
             mBound = false;
         }
     };
@@ -89,6 +93,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+//        android.os.Debug.waitForDebugger();
+
     }
 
     @Override
@@ -103,13 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     // TODO: hacer algo cuando se tienen los permisos
-                    // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
-                    // Bind to LocalService
-                    Intent intent = new Intent(this, GPSservice.class);
-                    bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-                    // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
-                    mService.setParameters(locationManager, polylineOptions, map);
-                    this.toggleNetworkUpdates();
+
 
                 } else {
 
@@ -142,6 +142,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(4).color(Color.RED);
 
+        map.getUiSettings().setZoomControlsEnabled(true);
+//        map.getUiSettings().setCompassEnabled(true);
+//        map.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     /**
@@ -164,7 +167,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isLocationEnabled() {
 
         // TODO : network provider no se puede probar en el emulador, revisar si se puede debaguear conectando el celular.
-        return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     public void toggleNetworkUpdates() {
@@ -172,7 +175,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (!checkLocation())
             return;
 
-        mService.toggleNetworkUpdates();
+//        mService.toggleNetworkUpdates();
+        mService.toggleGPSUpdates();
 
     }
 
@@ -183,6 +187,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStart() {
         super.onStart();
         // The activity is about to become visible.
+        // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
+        // Bind to LocalService
+        Intent intent = new Intent(this, GPSservice.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -192,6 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         // The activity has become visible (it is now "resumed").
+
     }
 
     /**

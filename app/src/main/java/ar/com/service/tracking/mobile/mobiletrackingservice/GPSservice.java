@@ -28,7 +28,15 @@ public class GPSservice extends Service {
     private GoogleMap map;
 
     // Binder given to clients
-    private final IBinder mBinder = new GPSbinder(this);
+    private final IBinder mBinder = new GPSbinder(GPSservice.this);
+//    private final IBinder mBinder = new LocalBinder();
+//
+//    public class LocalBinder extends Binder {
+//        GPSservice getService() {
+//            // Return this instance of LocalService so clients can call public methods
+//            return GPSservice.this;
+//        }
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,14 +68,15 @@ public class GPSservice extends Service {
     private final LocationListener locationListenerNetwork = new LocationListener() {
 
         private double longitudeNetwork, latitudeNetwork;
+        private LatLng centrar;
 
         public void onLocationChanged(Location location) {
             longitudeNetwork = location.getLongitude();
             latitudeNetwork = location.getLatitude();
 
-            LatLng centrar = new LatLng(latitudeNetwork, longitudeNetwork);
+            centrar = new LatLng(latitudeNetwork, longitudeNetwork);
             map.addMarker(new MarkerOptions().position(centrar).title("Yo"));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(centrar, 18));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
 
 //            runOnUiThread(new Runnable() {
 //                @Override
@@ -78,6 +87,60 @@ public class GPSservice extends Service {
                     map.addPolyline(polylineOptions);
 
                     Toast.makeText(GPSservice.this, "Network Provider update", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
+
+    public void toggleGPSUpdates() {
+
+        boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if (ACCESS_FINE_OK) {
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListenerGPS);
+            Toast.makeText(this, "GPS provider started running", Toast.LENGTH_LONG).show();
+
+        }
+
+    }
+
+    private final LocationListener locationListenerGPS = new LocationListener() {
+
+        private double longitudeGPS, latitudeGPS;
+        private LatLng centrar;
+
+        public void onLocationChanged(Location location) {
+            longitudeGPS = location.getLongitude();
+            latitudeGPS = location.getLatitude();
+
+            centrar = new LatLng(latitudeGPS, longitudeGPS);
+            map.addMarker(new MarkerOptions().position(centrar).title("Yo"));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
+
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+
+            // se agrega al polyline la nuevo posicion
+            polylineOptions.add(new LatLng(latitudeGPS, longitudeGPS));
+            map.addPolyline(polylineOptions);
+
+            Toast.makeText(GPSservice.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
 //                }
 //            });
         }
