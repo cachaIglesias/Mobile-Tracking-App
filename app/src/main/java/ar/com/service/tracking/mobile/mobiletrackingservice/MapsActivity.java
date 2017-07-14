@@ -13,8 +13,10 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -183,6 +185,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        mService.toggleNetworkUpdates();
         mService.toggleGPSUpdates();
 
+    }
+
+    public void settingsActivity(View view){
+        Intent settingsIntent = new Intent(this, SettingsActivity.class);
+        startActivity(settingsIntent);
     }
 
     /**
