@@ -128,7 +128,6 @@ public class GPSservice extends Service {
             map.addPolyline(polylineOptions);
 
             Toast.makeText(GPSservice.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
-
         }
 
         @Override

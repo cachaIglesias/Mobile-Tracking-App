@@ -4,6 +4,7 @@
 
     <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="24" />
 
+
     <!--
 
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
