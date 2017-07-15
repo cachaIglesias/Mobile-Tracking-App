@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.annotation.FloatRange;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +25,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -39,10 +43,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 1;
 
     private PermissionHelper permissionHelper = new PermissionHelper();
-
-    // Array of strings...
-    private String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry",
-            "WebOS","Ubuntu","Windows7","Max OS X"};
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -83,12 +83,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String explanationMessage = "Debe aceptar los permisos solicitados para un correcto funcionamiento de la aplicación";
         permissionHelper.verificarSiExistePermisoYSolicitarSiEsNecesario(this, permission, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST, title, explanationMessage);
 
+        ArrayList<Order> orders = new ArrayList<Order>();
+        orders.add(new Order("Diagonal 74","Pepe","Piza",new Float(10)));
+        orders.add(new Order("plaza paso","luz","termo",new Float(20)));
+        orders.add(new Order("plaza italia","agos","factura",new Float(30)));
+        orders.add(new Order("plaza rocha","anto","pastel",new Float(40)));
+
         // listView de ordenes
-        ArrayAdapter adapter = new ArrayAdapter<>(this,
-                R.layout.orders_view, mobileArray);
+        OrderAdapter adapter = new OrderAdapter(this, orders);
 
         ListView listView = findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
+
+        adapter.add(new Order("plaza san martin","hugo","borratinta",new Float(50)));
 
         // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
         // Bind to LocalService
