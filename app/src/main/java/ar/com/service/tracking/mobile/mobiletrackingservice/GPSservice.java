@@ -40,6 +40,8 @@ public class GPSservice extends Service {
         polylineOptions = ActiviyMapPolylineOptions;
         map = ActiviyMapMap;
 
+        TrackingServiceConnector.getInstance(GPSservice.this).getMethod();
+
     }
 
 //    public void toggleNetworkUpdates() {
@@ -116,6 +118,7 @@ public class GPSservice extends Service {
         private LatLng centrar;
 
         public void onLocationChanged(Location location) {
+
             longitudeGPS = location.getLongitude();
             latitudeGPS = location.getLatitude();
 
@@ -128,6 +131,7 @@ public class GPSservice extends Service {
             map.addPolyline(polylineOptions);
 
             Toast.makeText(GPSservice.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
+
         }
 
         @Override

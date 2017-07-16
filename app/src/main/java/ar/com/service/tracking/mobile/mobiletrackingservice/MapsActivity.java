@@ -11,13 +11,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.annotation.FloatRange;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toolbar;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,11 +23,22 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.gustavofao.jsonapi.JSONApiConverter;
+import com.gustavofao.jsonapi.Models.ErrorModel;
+import com.gustavofao.jsonapi.Models.JSONApiObject;
+import com.gustavofao.jsonapi.Models.Resource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+//    Call<JSONApiObject> call;
 
     private static final String TAG = "MapsActivity";
 
@@ -159,6 +168,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.getUiSettings().setZoomControlsEnabled(true);
 //        map.getUiSettings().setCompassEnabled(true);
 //        map.getUiSettings().setMyLocationButtonEnabled(true);
+
+//        TrackingService service = TrackingService.retrofit.create(TrackingService.class);
+//        call = service.getMethod();
+//
+//        call.enqueue(new Callback<JSONApiObject>() {
+//
+//            @Override
+//            public void onResponse(Call<JSONApiObject> call, Response<JSONApiObject> response) {
+//                // handle success
+//                if (response.body() != null) {
+//                    if (response.body().hasErrors()) {
+//                        List<ErrorModel> errorList = response.body().getErrors();
+//                        //Do something with the errors
+//                    } else {
+//                        Toast.makeText(MapsActivity.this, response.body().getData().toString(), Toast.LENGTH_LONG).show();
+//                        if (response.body().getData().size() > 0) {
+//                            Toast.makeText(MapsActivity.this, "Object With data", Toast.LENGTH_SHORT).show();
+//                            if (response.body().getData().size() == 1) {
+//                                //Single Object
+//                                ObjetoRespuesta article = (ObjetoRespuesta) response.body().getData(0);
+//                            } else {
+//                                //List of Objects
+//                                List<Resource> resources = response.body().getData();
+//                            }
+//                        } else {
+//                            Toast.makeText(MapsActivity.this, "No Items", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                } else {
+//                    try {
+//                        JSONApiConverter jsonApiConverter = new JSONApiConverter(ObjetoRespuesta.class);
+//                        JSONApiObject object = jsonApiConverter.fromJson(response.errorBody().string());
+////                        manejar el error
+////                        handleErrors(object.getErrors());
+//                    } catch (IOException e) {
+//                        Toast.makeText(MapsActivity.this, "Empty Body", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JSONApiObject> call, Throwable t) {
+//                // handle failure
+//                Toast.makeText(MapsActivity.this, "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
+//            }
+//
+//        });
+
     }
 
     /**
@@ -257,6 +314,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+//        outState.putSerializable("map", map);
+
     }
 
     /**
@@ -265,6 +324,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
+
+//        savedInstanceState.getSerializable("map");
 
     }
 
