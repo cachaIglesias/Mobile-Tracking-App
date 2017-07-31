@@ -1,10 +1,12 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.utils;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**
  * Created by miglesias on 01/07/17.

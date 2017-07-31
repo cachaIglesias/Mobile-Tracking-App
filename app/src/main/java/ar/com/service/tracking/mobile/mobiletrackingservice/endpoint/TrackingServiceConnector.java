@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import android.content.Context;
 import android.widget.Toast;
@@ -11,6 +11,7 @@ import com.gustavofao.jsonapi.Models.Resource;
 import java.io.IOException;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,6 +45,42 @@ public class TrackingServiceConnector {
     private void configurar() {
 
         setService(TrackingService.retrofit.create(TrackingService.class));
+
+    }
+
+    public void marcarComoFinalizado(){
+
+        Call<ResponseBody> call2 = getService().marcarComoFinalizado();
+
+        call2.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Toast.makeText(getLastContext(), response.body().toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getLastContext(), "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    public void gethMethodResponseBody(){
+
+        Call<ResponseBody> call2 = getService().getMethodResponseBody();
+
+        call2.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Toast.makeText(getLastContext(), response.body().toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getLastContext(), "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -95,7 +132,7 @@ public class TrackingServiceConnector {
             @Override
             public void onFailure(Call<JSONApiObject> call, Throwable t) {
                 // handle failure
-                Toast.makeText(getLastContext(), "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getLastContext(), "Falla en la conexción con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
             }
 
         });

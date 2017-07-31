@@ -6,7 +6,7 @@
     android:weightSum="1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.MapsActivity">
+    tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity">
 
     <android.support.v7.widget.Toolbar
     android:id="@+id/toolbar2"

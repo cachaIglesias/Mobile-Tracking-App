@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.activity;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -11,11 +11,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,22 +23,18 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.gustavofao.jsonapi.JSONApiConverter;
-import com.gustavofao.jsonapi.Models.ErrorModel;
-import com.gustavofao.jsonapi.Models.JSONApiObject;
-import com.gustavofao.jsonapi.Models.Resource;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
+import ar.com.service.tracking.mobile.mobiletrackingservice.R;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSbinder;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSservice;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
-//    Call<JSONApiObject> call;
 
     private static final String TAG = "MapsActivity";
 
@@ -53,6 +49,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private PermissionHelper permissionHelper = new PermissionHelper();
 
+    private String permission = Manifest.permission.ACCESS_FINE_LOCATION;
+
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -62,17 +60,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             GPSbinder binder = (GPSbinder) service;
             mService = binder.getService();
+            mService.setParameters(locationManager, polylineOptions, map);
+
+            Log.e(TAG, "Conexion con servicio GPS background establecida");
             mBound = true;
-//            if (mBound){
-                // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
-                mService.setParameters(locationManager, polylineOptions, map);
-                toggleLocationUpdates();
-//            }
+            // if (mBound){
+            // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
+            Log.e(TAG, "Servicio GPS background iniciado");
+            // se llama al servicio de actualizacion de posicones geograficas GPS o GPSA.
+            startLocationUpdates();
+            // }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            Log.e(TAG, "onServiceDisconnected");
+            Log.e(TAG, "Conexion con servicio GPS background terminada");
             mBound = false;
         }
     };
@@ -87,16 +89,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        String permission = Manifest.permission.ACCESS_FINE_LOCATION;
         String title = "Atencion!";
         String explanationMessage = "Debe aceptar los permisos solicitados para un correcto funcionamiento de la aplicación";
         permissionHelper.verificarSiExistePermisoYSolicitarSiEsNecesario(this, permission, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST, title, explanationMessage);
 
+
+
+        // ######################################################################### //
+        // Lista de ordenes, se deberian mostrar cuando se recuperar desde el endpoint
         ArrayList<Order> orders = new ArrayList<Order>();
-        orders.add(new Order("Diagonal 74","Pepe","Piza",new Float(10)));
-        orders.add(new Order("plaza paso","luz","termo",new Float(20)));
-        orders.add(new Order("plaza italia","agos","factura",new Float(30)));
-        orders.add(new Order("plaza rocha","anto","pastel",new Float(40)));
+        orders.add(new Order("Diagonal 74","Pepe","Piza",Float.valueOf(10)));
+        orders.add(new Order("plaza paso","luz","termo",Float.valueOf(20)));
+        orders.add(new Order("plaza italia","agos","factura",Float.valueOf(30)));
+        orders.add(new Order("plaza rocha","anto","pastel",Float.valueOf(40)));
 
         // listView de ordenes
         OrderAdapter adapter = new OrderAdapter(this, orders);
@@ -104,9 +109,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ListView listView = findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
 
-        adapter.add(new Order("plaza san martin","hugo","borratinta",new Float(50)));
+        adapter.add(new Order("plaza san martin","hugo","borratinta",Float.valueOf(50)));
+        // ######################################################################### //
 
-        // TODO: en algun lado llamar al servicio de actualizacion de posiciones.
+
+
         // Bind to LocalService
         Intent intent = new Intent(this, GPSservice.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -116,23 +123,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        android.os.Debug.waitForDebugger();
-
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 
         switch (requestCode) {
 
             case ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST: {
 
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     // TODO: hacer algo cuando se tienen los permisos
-
+                    Log.e(TAG, "Se tienen los permisos para: " + permission);
 
                 } else {
 
@@ -147,74 +151,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * @method Establece la configuracion inicial del mapa.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         map = googleMap;
-        LatLng laPlata = new LatLng(-34.9212,-57.95562);
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(laPlata, 13));
+        if(polylineOptions == null) {
+            // TODO: aca deberia obtener la ultima posicion GPS conocida para centrar el mapa ahi.
+            LatLng laPlata = new LatLng(-34.9212,-57.95562);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(laPlata, 13));
 
-        polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(8).color(Color.RED);
+            polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(8).color(Color.RED);
+        }else{
+            map.addPolyline(polylineOptions);
+        }
 
         map.getUiSettings().setZoomControlsEnabled(true);
-//        map.getUiSettings().setCompassEnabled(true);
-//        map.getUiSettings().setMyLocationButtonEnabled(true);
-
-//        TrackingService service = TrackingService.retrofit.create(TrackingService.class);
-//        call = service.getMethod();
-//
-//        call.enqueue(new Callback<JSONApiObject>() {
-//
-//            @Override
-//            public void onResponse(Call<JSONApiObject> call, Response<JSONApiObject> response) {
-//                // handle success
-//                if (response.body() != null) {
-//                    if (response.body().hasErrors()) {
-//                        List<ErrorModel> errorList = response.body().getErrors();
-//                        //Do something with the errors
-//                    } else {
-//                        Toast.makeText(MapsActivity.this, response.body().getData().toString(), Toast.LENGTH_LONG).show();
-//                        if (response.body().getData().size() > 0) {
-//                            Toast.makeText(MapsActivity.this, "Object With data", Toast.LENGTH_SHORT).show();
-//                            if (response.body().getData().size() == 1) {
-//                                //Single Object
-//                                ObjetoRespuesta article = (ObjetoRespuesta) response.body().getData(0);
-//                            } else {
-//                                //List of Objects
-//                                List<Resource> resources = response.body().getData();
-//                            }
-//                        } else {
-//                            Toast.makeText(MapsActivity.this, "No Items", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                } else {
-//                    try {
-//                        JSONApiConverter jsonApiConverter = new JSONApiConverter(ObjetoRespuesta.class);
-//                        JSONApiObject object = jsonApiConverter.fromJson(response.errorBody().string());
-////                        manejar el error
-////                        handleErrors(object.getErrors());
-//                    } catch (IOException e) {
-//                        Toast.makeText(MapsActivity.this, "Empty Body", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<JSONApiObject> call, Throwable t) {
-//                // handle failure
-//                Toast.makeText(MapsActivity.this, "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
-//            }
-//
-//        });
 
     }
 
@@ -222,11 +176,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @method Verifica si la localizacion GPS y por RED este activa y envia un mensaje de alerta en caso de no estarlo
      */
     private boolean checkLocation() {
+
         if (!isLocationEnabled()) {
 
             Intent source_location_intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             String titulo = "Habilite geolocalización";
-            String mensaje = "Su ubicación esta desactivada.\npor favor active su ubicación";
+            String mensaje = "Su ubicación esta desactivada.\npor favor activela.";
             String intent_mensaje = "Configuración de ubicación";
 
             MessageHelper.showAlertWithIntent(this, source_location_intent, titulo, mensaje, intent_mensaje);
@@ -241,16 +196,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); //|| locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    public void toggleLocationUpdates() {
+    /**
+     * @method Verifica que se encuentre activa la geolocalizacion y solicita activacion, para disparar el servicio background de actualizacion de posiciones gps.
+     */
+    public void startLocationUpdates() {
 
         if (!checkLocation())
             return;
 
-//        mService.toggleNetworkUpdates();
-        mService.toggleGPSUpdates();
+        //mService.startNetworkUpdates();
+        mService.startGPSUpdates();
 
     }
 
+    /**
+     * @method  Dispara la actividad de configuracion
+     *
+     * @param view
+     */
     public void settingsActivity(View view){
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
         startActivity(settingsIntent);
@@ -299,8 +262,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // TODO: va a servir para liberar el servicio de actualizacion de posiciones.
-        // Unbind from the service
+
+        // libera el servicio background de actualizacion de posiciones gps
         if (mBound) {
             unbindService(mConnection);
             mBound = false;
@@ -314,7 +277,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-//        outState.putSerializable("map", map);
+        outState.putParcelable("polylineOptions",polylineOptions);
 
     }
 
@@ -325,7 +288,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
 
-//        savedInstanceState.getSerializable("map");
+        polylineOptions = savedInstanceState.getParcelable("polylineOptions");
 
     }
 

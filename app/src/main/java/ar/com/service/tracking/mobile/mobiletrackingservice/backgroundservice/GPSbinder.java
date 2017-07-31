@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
 
 import android.os.Binder;
 
@@ -14,7 +14,7 @@ public class GPSbinder extends Binder {
         service = gpSservice;
     }
 
-    GPSservice getService() {
+    public GPSservice getService() {
         // Return this instance of LocalService so clients can call public methods
         return service;
     }

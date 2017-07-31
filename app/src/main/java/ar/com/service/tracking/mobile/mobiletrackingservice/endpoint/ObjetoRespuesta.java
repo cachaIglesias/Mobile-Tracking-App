@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import com.gustavofao.jsonapi.Annotations.Type;
 import com.gustavofao.jsonapi.Models.Resource;
@@ -15,7 +15,6 @@ public class ObjetoRespuesta extends Resource{
     private String author;
 
     public ObjetoRespuesta(){  }
-
 
     public String getAuthor() {
         return author;

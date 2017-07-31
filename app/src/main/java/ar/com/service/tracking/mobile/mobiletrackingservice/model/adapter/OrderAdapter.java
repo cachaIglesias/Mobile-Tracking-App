@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import ar.com.service.tracking.mobile.mobiletrackingservice.R;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 
 /**
  * Created by miglesias on 14/07/17.

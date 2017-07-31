@@ -1,10 +1,12 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.utils;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
+
+import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 
 /**
  * Created by miglesias on 01/07/17.

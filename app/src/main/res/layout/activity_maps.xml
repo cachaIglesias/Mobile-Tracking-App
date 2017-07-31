@@ -4,7 +4,7 @@
     <!--xmlns:tools="http://schemas.android.com/tools"-->
     <!--android:layout_width="match_parent"-->
     <!--android:layout_height="match_parent">-->
-    <!--tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.MapsActivity">-->
+    <!--tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity">-->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,7 +13,7 @@
     android:weightSum="1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.MapsActivity">
+    tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity">
 
     <!-- Toolbar -->
     <android.support.v7.widget.Toolbar
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1.02"
-        tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.MapsActivity" />
+        tools:context="ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity" />
 
     <!--lista de ordenes-->
 

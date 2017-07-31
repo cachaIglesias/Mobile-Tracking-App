@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
 
 import android.Manifest;
 import android.app.Service;
@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
@@ -16,10 +15,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.Random;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 
 public class GPSservice extends Service {
 
@@ -34,17 +32,19 @@ public class GPSservice extends Service {
         return mBinder;
     }
 
-    public void setParameters(LocationManager ActiviyMapLocationManager, PolylineOptions ActiviyMapPolylineOptions, GoogleMap ActiviyMapMap) {
+    public void setParameters(LocationManager activiyMapLocationManager, PolylineOptions activiyMapPolylineOptions, GoogleMap activiyMapMap) {
 
-        locationManager = ActiviyMapLocationManager;
-        polylineOptions = ActiviyMapPolylineOptions;
-        map = ActiviyMapMap;
+        locationManager = activiyMapLocationManager;
+        polylineOptions = activiyMapPolylineOptions;
+        map = activiyMapMap;
 
         TrackingServiceConnector.getInstance(GPSservice.this).getMethod();
 
+//        TrackingServiceConnector.getInstance(GPSservice.this).gethMethodResponseBody();
+
     }
 
-//    public void toggleNetworkUpdates() {
+//    public void startNetworkUpdates() {
 //
 //        boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 //
@@ -99,12 +99,12 @@ public class GPSservice extends Service {
 //        }
 //    };
 
-    public void toggleGPSUpdates() {
+    public void startGPSUpdates() {
 
         boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         if (ACCESS_FINE_OK) {
-
+            map.setMyLocationEnabled(true);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListenerGPS);
             Toast.makeText(this, "GPS provider started running", Toast.LENGTH_LONG).show();
 
@@ -121,11 +121,11 @@ public class GPSservice extends Service {
 
             longitudeGPS = location.getLongitude();
             latitudeGPS = location.getLatitude();
-
             centrar = new LatLng(latitudeGPS, longitudeGPS);
+
             map.clear();
-            map.addMarker(new MarkerOptions().position(centrar).title("Tu posición"));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
+//            map.addMarker(new MarkerOptions().position(centrar).title("Tu posición"));
 
             polylineOptions.add(new LatLng(latitudeGPS, longitudeGPS));
             map.addPolyline(polylineOptions);
