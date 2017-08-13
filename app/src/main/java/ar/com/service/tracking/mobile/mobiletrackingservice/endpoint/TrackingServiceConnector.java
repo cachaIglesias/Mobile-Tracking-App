@@ -9,9 +9,13 @@ import com.gustavofao.jsonapi.Models.JSONApiObject;
 import com.gustavofao.jsonapi.Models.Resource;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.ResponseBody;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,94 +52,46 @@ public class TrackingServiceConnector {
 
     }
 
-    public void marcarComoFinalizado(){
+    public void marcarComoFinalizado(Integer orderID){
 
-        Call<ResponseBody> call2 = getService().marcarComoFinalizado();
-
-        call2.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Toast.makeText(getLastContext(), response.body().toString(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getLastContext(), "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        ResponseObject responseObject = new ResponseObject(getLastContext());
+        this.setCall(getService().marcarComoFinalizado(orderID));
+        this.getCall().enqueue(responseObject);
 
     }
 
-    public void gethMethodResponseBody(){
 
-        Call<ResponseBody> call2 = getService().getMethodResponseBody();
+    public void marcarComoCancelado(Integer orderID){
 
-        call2.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Toast.makeText(getLastContext(), response.body().toString(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getLastContext(), "Falla en la conexcion con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        ResponseObject responseObject = new ResponseObject(getLastContext());
+        this.setCall(getService().marcarComoCancelado(orderID));
+        this.getCall().enqueue(responseObject);
 
     }
 
-    public void getMethod(){
+    public void getEntregaActiva(Integer deliveryManID, OrderAdapter orderAdapter){
 
-//        new Thread(new Runnable() {
-//            public void run() {
-//
-//            }
-//        }).start();
+        OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter);
+        ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
+        setCall(getService().getEntregaActiva(deliveryManID));
+        // forma asincronica
+        getCall().enqueue(responseObject);
+        // forma sincronica
+//        try {
+//            Response<JSONApiObject> response = getCall().execute();
+//            responseObject.onResponse(getCall(),response);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        setCall(getService().getMethod());
-        getCall().enqueue(new Callback<JSONApiObject>() {
+    }
 
-            @Override
-            public void onResponse(Call<JSONApiObject> call, Response<JSONApiObject> response) {
-                // handle success
-                if (response.body() != null) {
-                    if (response.body().hasErrors()) {
-                        List<ErrorModel> errorList = response.body().getErrors();
-                        //Do something with the errors
-                    } else {
-                        Toast.makeText(getLastContext(), response.body().getData().toString(), Toast.LENGTH_LONG).show();
-                        if (response.body().getData().size() > 0) {
-                            Toast.makeText(getLastContext(), "Object With data", Toast.LENGTH_SHORT).show();
-                            if (response.body().getData().size() == 1) {
-                                //Single Object
-                                ObjetoRespuesta article = (ObjetoRespuesta) response.body().getData(0);
-                            } else {
-                                //List of Objects
-                                List<Resource> resources = response.body().getData();
-                            }
-                        } else {
-                            Toast.makeText(getLastContext(), "No Items", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    try {
-                        JSONApiConverter jsonApiConverter = new JSONApiConverter(ObjetoRespuesta.class);
-                        JSONApiObject object = jsonApiConverter.fromJson(response.errorBody().string());
-//                        manejar el error
-//                        handleErrors(object.getErrors());
-                    } catch (IOException e) {
-                        Toast.makeText(getLastContext(), "Empty Body", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
+    public void nuevasPosiciones(Integer deliveryManID, List<Position> positions){
 
-            @Override
-            public void onFailure(Call<JSONApiObject> call, Throwable t) {
-                // handle failure
-                Toast.makeText(getLastContext(), "Falla en la conexción con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
-            }
+        ResponseObject responseObject = new ResponseObject(getLastContext());
+        setCall(getService().nuevasPosiciones(deliveryManID, positions));
+        getCall().enqueue(responseObject);
 
-        });
     }
 
     public Context getLastContext() {

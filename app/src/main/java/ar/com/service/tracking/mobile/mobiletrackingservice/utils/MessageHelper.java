@@ -1,10 +1,12 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 
@@ -55,6 +57,17 @@ public class MessageHelper {
                 });
 
         dialog.show();
+    }
+
+    /**
+     * @method muestra un mensaje de sistema
+     *
+     * @param context contexto en el que se muestra
+     * @param message texto a mostrar
+     * @param duration puede ser Toast.LENGTH_SHORT o Toast.LENGTH_LONG
+     */
+    static public void toast(Context context, String message, int duration){
+        Toast.makeText(context, message, duration).show();
     }
 
 }

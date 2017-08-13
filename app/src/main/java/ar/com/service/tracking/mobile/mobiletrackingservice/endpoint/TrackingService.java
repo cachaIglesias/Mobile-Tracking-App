@@ -1,10 +1,18 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import com.gustavofao.jsonapi.Models.JSONApiObject;
+import com.gustavofao.jsonapi.Models.JSONList;
+import com.gustavofao.jsonapi.Models.Resource;
 import com.gustavofao.jsonapi.Retrofit.JSONConverterFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Delivery;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.DeliveryMan;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -19,25 +27,24 @@ import retrofit2.http.Path;
 
 public interface TrackingService {
 
-    // "http://10.0.2.2:3000/"
+    Class[] classes = { Business.class, Delivery.class, DeliveryMan.class, Order.class, Position.class };
+
+    // mascara que identifica a LocalHost en Android > "http://10.0.2.2:3000/"
     public static final Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("http://10.0.2.2:3000/")
-            .addConverterFactory(JSONConverterFactory.create(ObjetoRespuesta.class))
+            .addConverterFactory(JSONConverterFactory.create(classes))
             .build();
 
-    @GET("users/{user}/followers")
-    Call<List<String>> listRepos(@Path("user") String user);
+    @POST("api/orders/{id}/mark_as_finalized")
+    Call<JSONApiObject> marcarComoFinalizado(@Path("id") int orderID);
 
-    @GET("posts/1")
-    Call<JSONApiObject> getMethod();
+    @POST("api/orders/{id}/mark_as_canceled")
+    Call<JSONApiObject> marcarComoCancelado(@Path("id") int orderID);
 
-    @GET("posts/1")
-    Call<ResponseBody> getMethodResponseBody();
+    @GET("/api/delivery_men/{id}/active_delivery_orders")
+    Call<JSONApiObject> getEntregaActiva(@Path("id") int deliveryMenID);
 
-    @POST("posts/new")
-    Call<ResponseBody> createUser(@Body ObjetoRespuesta nuevo);
-
-    @POST("api/orders/55/mark_as_finalized")
-    Call<ResponseBody> marcarComoFinalizado();
+    @POST("/api/delivery_men/{id}/new_positions")
+    Call<JSONApiObject> nuevasPosiciones(@Path("id") int deliveryMenID, @Body List<Position> positions);
 
 }

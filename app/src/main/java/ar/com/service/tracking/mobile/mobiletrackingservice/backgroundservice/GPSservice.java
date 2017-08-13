@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
@@ -17,7 +18,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
+
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 
 public class GPSservice extends Service {
 
@@ -38,7 +42,7 @@ public class GPSservice extends Service {
         polylineOptions = activiyMapPolylineOptions;
         map = activiyMapMap;
 
-        TrackingServiceConnector.getInstance(GPSservice.this).getMethod();
+//        TrackingServiceConnector.getInstance(GPSservice.this).getEntregaActiva();
 
 //        TrackingServiceConnector.getInstance(GPSservice.this).gethMethodResponseBody();
 

@@ -1,15 +1,37 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.model;
 
+import com.gustavofao.jsonapi.Annotations.Excluded;
+import com.gustavofao.jsonapi.Annotations.Type;
+import com.gustavofao.jsonapi.Models.Resource;
+
+import java.util.Date;
+
 /**
  * Created by miglesias on 08/07/17.
  */
+@Type("orders")
+public class Order extends Resource {
 
-public class Order {
+    @Excluded
+    private String direccion = "vacio";
+    @Excluded
+    private String destinatario = "vacio";
+    @Excluded
+    private String producto = "vacio";
+    @Excluded
+    private Float valor = Float.valueOf("0");
 
-    private String direccion;
-    private String destinatario;
-    private String producto;
-    private Float valor;
+
+    private Date start_date;
+    private Date end_date;
+    private String address;
+    private String status;
+
+    private Business business;
+    private Position position;
+    private Delivery delivery;
+
+    public Order(){}
 
     public Order(String dir, String dest, String prod, Float val){
         direccion = dir;
@@ -55,6 +77,62 @@ public class Order {
        return direccion + "\n" + destinatario + "\n" + producto + "         " + valor;
     }
 
+    public Business getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(Business business) {
+        this.business = business;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    public Delivery getDelivery() {
+        return delivery;
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
+
+    public Date getStart_date() {
+        return start_date;
+    }
+
+    public void setStart_date(Date start_date) {
+        this.start_date = start_date;
+    }
+
+    public Date getEnd_date() {
+        return end_date;
+    }
+
+    public void setEnd_date(Date end_date) {
+        this.end_date = end_date;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 //    // Constructor to convert JSON object into a Java class instance
 //    public User(JSONObject object){
 //        try {
@@ -78,4 +156,6 @@ public class Order {
 //        }
 //        return users;
 //    }
+
+
 }

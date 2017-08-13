@@ -43,7 +43,8 @@
             android:background="@color/colorPrimary"
             app:theme="@style/AppTheme"
             android:contentDescription="Settings"
-            android:onClick="settingsActivity"/>
+            android:onClick="clickear"/>
+        <!--android:onClick="settingsActivity"-->
 
     </android.support.v7.widget.Toolbar>
 

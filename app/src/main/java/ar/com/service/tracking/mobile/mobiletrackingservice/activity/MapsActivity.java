@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSbinder;
@@ -50,6 +51,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private PermissionHelper permissionHelper = new PermissionHelper();
 
     private String permission = Manifest.permission.ACCESS_FINE_LOCATION;
+
+    private ArrayList<Order> orders;
+    private OrderAdapter adapter;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -97,20 +101,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // ######################################################################### //
         // Lista de ordenes, se deberian mostrar cuando se recuperar desde el endpoint
-        ArrayList<Order> orders = new ArrayList<Order>();
-        orders.add(new Order("Diagonal 74","Pepe","Piza",Float.valueOf(10)));
-        orders.add(new Order("plaza paso","luz","termo",Float.valueOf(20)));
-        orders.add(new Order("plaza italia","agos","factura",Float.valueOf(30)));
-        orders.add(new Order("plaza rocha","anto","pastel",Float.valueOf(40)));
+        this.setOrders(new ArrayList<Order>());
+        this.getOrders().add(new Order("Diagonal 74","Pepe","Piza",Float.valueOf(10)));
+        this.getOrders().add(new Order("plaza paso","luz","termo",Float.valueOf(20)));
+        this.getOrders().add(new Order("plaza italia","agos","factura",Float.valueOf(30)));
+        this.getOrders().add(new Order("plaza rocha","anto","pastel",Float.valueOf(40)));
 
         // listView de ordenes
-        OrderAdapter adapter = new OrderAdapter(this, orders);
+        this.setAdapter(new OrderAdapter(this, this.getOrders()));
 
         ListView listView = findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
 
-        adapter.add(new Order("plaza san martin","hugo","borratinta",Float.valueOf(50)));
-        // ######################################################################### //
+//        adapter.add(new Order("plaza san martin","hugo","borratinta",Float.valueOf(50)));
+       //  ######################################################################### //
 
 
 
@@ -219,6 +223,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(settingsIntent);
     }
 
+
+    public void clickear(View view){
+
+        TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, this.getAdapter());
+
+//        ArrayList<Position> positions = new ArrayList<Position>();
+//        positions.add(new Position(-34.91573983088295, -57.94549774378538));
+////        positions.add(new Position(-34.915714812737185, -57.94518744572997));
+////        positions.add(new Position(-34.91573240791741, -57.944844122976065));
+////        positions.add(new Position(-34.91573240791741, -57.94462954625487));
+////        positions.add(new Position(-34.915723610327774, -57.944318410009146));
+////        positions.add(new Position(-34.915714812737185, -57.94399654492736));
+////        positions.add(new Position(-34.915785193435504, -57.943846341222525));
+////        positions.add(new Position(-34.915934752219066, -57.94367467984557));
+//
+//        TrackingServiceConnector.getInstance(MapsActivity.this).nuevasPosiciones(3, positions);
+    }
     /**
      * @method Inicia el ciclo de vida visible de la actividad
      */
@@ -292,4 +313,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+    public ArrayList<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(ArrayList<Order> orders) {
+        this.orders = orders;
+    }
+
+
+    public OrderAdapter getAdapter() {
+        return adapter;
+    }
+
+    public void setAdapter(OrderAdapter adapter) {
+        this.adapter = adapter;
+    }
 }
