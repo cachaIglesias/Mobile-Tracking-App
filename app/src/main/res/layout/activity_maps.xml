@@ -25,12 +25,22 @@
         app:theme="@style/AppTheme"
         android:weightSum="1">
 
+        <Button
+            android:id="@+id/deliver_button"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:text="@string/deliver"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:background="@color/lightGreen"
+            android:onClick="enviarPosiciones"/>
+
         <TextView
             android:id="@+id/toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="30dp"
+            android:textSize="24dp"
             android:layout_gravity="center"
             android:text="@string/app_name"
             />
@@ -43,8 +53,8 @@
             android:background="@color/colorPrimary"
             app:theme="@style/AppTheme"
             android:contentDescription="Settings"
-            android:onClick="clickear"/>
-        <!--android:onClick="settingsActivity"-->
+            android:onClick="settingsActivity"/>
+        <!--android:onClick="clickear"-->
 
     </android.support.v7.widget.Toolbar>
 

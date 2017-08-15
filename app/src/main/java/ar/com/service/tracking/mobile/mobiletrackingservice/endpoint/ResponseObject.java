@@ -45,7 +45,7 @@ public class ResponseObject implements Callback<JSONApiObject>{
                 //Do something with the errors
                 List<ErrorModel> errorList = response.body().getErrors();
             } else {
-                Toast.makeText(getContext(), response.body().getData().toString(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), response.body().getData().toString(), Toast.LENGTH_LONG).show();
                 if (response.body().getData().size() > 0) {
                     Toast.makeText(getContext(), "Object With data", Toast.LENGTH_SHORT).show();
                     if (response.body().getData().size() == 1) {

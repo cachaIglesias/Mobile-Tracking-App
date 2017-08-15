@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 public class GPSservice extends Service {
 
@@ -108,9 +109,10 @@ public class GPSservice extends Service {
         boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         if (ACCESS_FINE_OK) {
+
             map.setMyLocationEnabled(true);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListenerGPS);
-            Toast.makeText(this, "GPS provider started running", Toast.LENGTH_LONG).show();
+            MessageHelper.toast(this,"GPS provider started running", Toast.LENGTH_LONG);
 
         }
 
@@ -152,5 +154,12 @@ public class GPSservice extends Service {
 
         }
     };
+
+    public void stopGPSUpdates(){
+
+        locationManager.removeUpdates(locationListenerGPS);
+        MessageHelper.toast(this,"GPS provider stoped", Toast.LENGTH_LONG);
+
+    }
 
 }

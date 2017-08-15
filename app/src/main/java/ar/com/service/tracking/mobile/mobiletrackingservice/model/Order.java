@@ -13,13 +13,13 @@ import java.util.Date;
 public class Order extends Resource {
 
     @Excluded
-    private String direccion = "vacio";
+    private String direccion = "";
     @Excluded
-    private String destinatario = "vacio";
+    private String destinatario = "";
     @Excluded
-    private String producto = "vacio";
+    private String producto = "";
     @Excluded
-    private Float valor = Float.valueOf("0");
+    private Float valor ;
 
 
     private Date start_date;

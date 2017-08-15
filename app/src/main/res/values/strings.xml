@@ -3,6 +3,11 @@
     <string name="title_activity_maps">Map</string>
     <string name="cancel">Cancelar</string>
     <string name="done">Continuar</string>
+    <string name="deliver">Repartir</string>
+    <string name="pause">Pausar</string>
+    <string name="spinner_title">Titulo</string>
+
+
     <integer name="mapZoom">10</integer>
     <integer name="minTimePositionRefresh">200</integer>
     <integer name="minDistancePositionRefresh">10</integer>
