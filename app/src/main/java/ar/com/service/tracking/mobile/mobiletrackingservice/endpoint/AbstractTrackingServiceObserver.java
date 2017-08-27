@@ -12,7 +12,6 @@ public abstract class AbstractTrackingServiceObserver {
 
     private List<Resource> responseObjectList;
 
-
     public List<Resource> getResponseObjectList() {
         return responseObjectList;
     }

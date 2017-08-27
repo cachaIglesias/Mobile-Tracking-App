@@ -3,11 +3,11 @@ package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
 import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
@@ -18,10 +18,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.ArrayList;
-
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 public class GPSservice extends Service {
@@ -31,6 +27,8 @@ public class GPSservice extends Service {
     private GoogleMap map;
 
     private final IBinder mBinder = new GPSbinder(GPSservice.this);
+
+    private SharedPreferences sharedPref;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -43,9 +41,7 @@ public class GPSservice extends Service {
         polylineOptions = activiyMapPolylineOptions;
         map = activiyMapMap;
 
-//        TrackingServiceConnector.getInstance(GPSservice.this).getEntregaActiva();
-
-//        TrackingServiceConnector.getInstance(GPSservice.this).gethMethodResponseBody();
+        sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
 
     }
 
@@ -110,8 +106,11 @@ public class GPSservice extends Service {
 
         if (ACCESS_FINE_OK) {
 
+            Long segundos = Long.valueOf(getSharedPref().getString("minTime", "3").split(" ")[0]);
+            Float metros = Float.valueOf(getSharedPref().getString("minDist", "10").split(" ")[0]);
+
             map.setMyLocationEnabled(true);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListenerGPS);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, segundos * 1000, metros, locationListenerGPS);
             MessageHelper.toast(this,"GPS provider started running", Toast.LENGTH_LONG);
 
         }
@@ -129,12 +128,23 @@ public class GPSservice extends Service {
             latitudeGPS = location.getLatitude();
             centrar = new LatLng(latitudeGPS, longitudeGPS);
 
+            String zoom = getSharedPref().getString("centerZoom", "1").split(" ")[0];
+
             map.clear();
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
 //            map.addMarker(new MarkerOptions().position(centrar).title("Tu posición"));
 
             polylineOptions.add(new LatLng(latitudeGPS, longitudeGPS));
             map.addPolyline(polylineOptions);
+
+            // TODO > Acomodar vez que este probado
+//            try{
+//                ArrayList<Position> positions = new ArrayList<Position>();
+//                positions.add(new Position(latitudeGPS, longitudeGPS));
+//                TrackingServiceConnector.getInstance(GPSservice.this).nuevasPosiciones(3, positions);
+//            }catch (Exception e){
+//                MessageHelper.toast(GPSservice.this, "No se pudo enviar una posicion GPS", Toast.LENGTH_SHORT);
+//            }
 
             Toast.makeText(GPSservice.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
 
@@ -162,4 +172,12 @@ public class GPSservice extends Service {
 
     }
 
+
+    public SharedPreferences getSharedPref() {
+        return sharedPref;
+    }
+
+    public void setSharedPref(SharedPreferences sharedPref) {
+        this.sharedPref = sharedPref;
+    }
 }

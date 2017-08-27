@@ -75,6 +75,16 @@
         android:layout_height="132dp"
         />
 
+    <TextView
+        android:id="@+id/list_menssage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="24dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
 </LinearLayout>
 
 <!--</android.support.constraint.ConstraintLayout>-->

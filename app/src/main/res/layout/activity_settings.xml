@@ -42,7 +42,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dip"
-        android:text="Tiempo minimo de refrezco:"
+        android:text="Tiempo mínimo de actualización:"
         android:textSize="20dp"
         android:paddingStart="10pt"
         android:paddingLeft="10pt"
@@ -51,6 +51,27 @@
 
     <Spinner
         android:id="@+id/spinner_min_time"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:prompt="@string/spinner_title"
+        android:textSize="20dp"
+        android:paddingStart="10pt"
+        android:paddingLeft="10pt"
+        />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="Distancia mínima de actualización:"
+        android:textSize="20dp"
+        android:paddingStart="10pt"
+        android:paddingLeft="10pt"
+        android:paddingBottom="5pt"
+        />
+
+    <Spinner
+        android:id="@+id/spinner_min_dist"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:prompt="@string/spinner_title"

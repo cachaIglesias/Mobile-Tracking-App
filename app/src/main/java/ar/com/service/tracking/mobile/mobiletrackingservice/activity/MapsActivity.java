@@ -5,38 +5,53 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
-import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSbinder;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSservice;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -55,15 +70,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String permission = Manifest.permission.ACCESS_FINE_LOCATION;
 
-    private ArrayList<Order> orders;
     private OrderAdapter adapter;
+
+    private final Handler handler = new Handler();
+    private Timer timer = new Timer();
+
+    private SharedPreferences sharedPref;
+
+    private FusedLocationProviderClient mFusedLocationClient;
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
+        public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             GPSbinder binder = (GPSbinder) service;
             mService = binder.getService();
@@ -95,36 +115,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         String title = "Atencion!";
         String explanationMessage = "Debe aceptar los permisos solicitados para un correcto funcionamiento de la aplicación";
         permissionHelper.verificarSiExistePermisoYSolicitarSiEsNecesario(this, permission, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST, title, explanationMessage);
 
-
-
-        // ######################################################################### //
-        // Lista de ordenes, se deberian mostrar cuando se recuperar desde el endpoint
-        this.setOrders(new ArrayList<Order>());
-        this.getOrders().add(new Order("No hay entregas pendientes","","",null));
-//        this.getOrders().add(new Order("plaza paso","luz","termo",Float.valueOf(20)));
-//        this.getOrders().add(new Order("plaza italia","agos","factura",Float.valueOf(30)));
-//        this.getOrders().add(new Order("plaza rocha","anto","pastel",Float.valueOf(40)));
-
-        // listView de ordenes
-        this.setAdapter(new OrderAdapter(this, this.getOrders()));
-
-        ListView listView = findViewById(R.id.mobile_list);
-        listView.setAdapter(adapter);
-
-//        adapter.add(new Order("plaza san martin","hugo","borratinta",Float.valueOf(50)));
-       //  ######################################################################### //
-
-
+        this.initializeOrderAndConfigureAdapter();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+    }
+
+    private void initializeOrderAndConfigureAdapter() {
+
+        // listView de ordenes
+        this.setAdapter(new OrderAdapter(this, new LinkedList<Order>()));
+
+        ListView listView = findViewById(R.id.mobile_list);
+
+        // configurar vista de lista vacia
+        TextView list_message_text_view = findViewById(R.id.list_menssage);
+        list_message_text_view.setText("No tienes una entrega activa");
+        list_message_text_view.setPadding(5, 5, 5, 40);
+        listView.setEmptyView(list_message_text_view);
+
+        listView.setAdapter(this.getAdapter());
 
     }
 
@@ -161,10 +182,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         map = googleMap;
 
-        if(polylineOptions == null) {
-            // TODO: aca deberia obtener la ultima posicion GPS conocida para centrar el mapa ahi.
-            LatLng laPlata = new LatLng(-34.9212,-57.95562);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(laPlata, 13));
+        if (polylineOptions == null) {
+
+            LatLng initialPosition = new LatLng(-34.9212,-57.95562);
+            boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+            if (ACCESS_FINE_OK) {
+
+                Task<Location> locationTask = getmFusedLocationClient().getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            //
+                        }
+                    }
+                });
+
+                locationTask.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+
+                        Location location = task.getResult();
+
+                        if (location != null){
+                            LatLng initialPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
+                        }
+
+                    }
+                });
+
+            }
+
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
 
             polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(8).color(Color.RED);
         }else{
@@ -220,31 +271,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void settingsActivity(View view){
 
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
-
-        int requestCode = 123;
-      startActivityForResult(settingsIntent, requestCode);
-//        startActivity(settingsIntent);
-
-    }
-
-    @Override protected void onActivityResult (int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode, resultCode, data);
-
-        int responseCode = 123;
-
-        if (requestCode == responseCode && resultCode==RESULT_OK) {
-
-            String res = data.getExtras().getString("resultado");
-            String res1 = data.getExtras().getString("resultado1");
-            MessageHelper.toast(this, res + res1, Toast.LENGTH_SHORT);
-
-        }
+// TODO > esto deberia hacerse como estaba antes y los valores guardarlos en alguna base de datos. los mismo deberian levantarse en el oncreate y estar disponible para todos.
+//        int requestCode = 123;
+//      startActivityForResult(settingsIntent, requestCode);
+        startActivity(settingsIntent);
 
     }
+
+//    @Override protected void onActivityResult (int requestCode, int resultCode, Intent data){
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        int responseCode = 123;
+//
+//        if (requestCode == responseCode && resultCode==RESULT_OK) {
+//
+//            String res = data.getExtras().getString("resultado");
+//            String res1 = data.getExtras().getString("resultado1");
+//            MessageHelper.toast(this, res + res1, Toast.LENGTH_SHORT);
+//
+//        }
+//
+//    }
 
     public void clickear(View view){
 
-//        TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, this.getAdapter());
+        // TODO > TODAVIA NO MANDA EL FORMATO QUE TIENE QUE MANDAR
 
         ArrayList<Position> positions = new ArrayList<Position>();
         positions.add(new Position(-34.91573983088295, -57.94549774378538));
@@ -275,9 +326,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             button.setText(R.string.deliver);
 
+            this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
+
         } else {
 
-            TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, this.getAdapter());
+            if(!this.getAdapter().isEmpty()){
+
+                MessageHelper.showOnlyAlert(this, "Atención!", "Existen ordenes sin repartir, por lo que la lista de ordenes no se actualizará");
+
+            }else{
+
+                try{
+                    TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, this.getAdapter());
+                    // TODO > aca se deberia armar el recorrido
+                    // TODO > aca deberia agregar las posiciones destino al mapa
+                }catch (Exception e){
+                    MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
+                }
+
+                this.obtenerEntregaActivaCadaUnMinuto();
+
+            }
+
+            // limpiar pililyne
+            polylineOptions = new PolylineOptions().geodesic(true).visible(true).width(8).color(Color.RED);
+            map.addPolyline(polylineOptions);
 
             // Bind to LocalService
             Intent intent = new Intent(this, GPSservice.class);
@@ -287,6 +360,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
+    }
+
+    private void cancelarObtencionDeEntregaActivaCadaUnMinuto() {
+
+        this.getTimer().cancel();
+
+    }
+
+    private void obtenerEntregaActivaCadaUnMinuto() {
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                getHandler().post(new Runnable() {
+                    public void run() {
+                        try {
+                            //Ejecuta tu AsyncTask!
+                            TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, getAdapter());
+                            // TODO > aca se deberia armar el recorrido
+                            // TODO > aca deberia agregar las posiciones destino al mapa
+                        } catch (Exception e) {
+                            Log.e("error", e.getMessage());
+                            MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa cada 1 minuto", Toast.LENGTH_SHORT);
+                        }
+                    }
+                });
+            }
+        };
+
+        this.getTimer().schedule(task, 60000, 60000);
     }
 
     /**
@@ -363,20 +466,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public ArrayList<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(ArrayList<Order> orders) {
-        this.orders = orders;
-    }
-
-
     public OrderAdapter getAdapter() {
         return adapter;
     }
 
     public void setAdapter(OrderAdapter adapter) {
         this.adapter = adapter;
+    }
+
+
+    public Handler getHandler() {
+        return handler;
+    }
+
+    public Timer getTimer() {
+        return timer;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
+
+
+    public SharedPreferences getSharedPref() {
+        return sharedPref;
+    }
+
+    public void setSharedPref(SharedPreferences sharedPref) {
+        this.sharedPref = sharedPref;
+    }
+
+
+    public FusedLocationProviderClient getmFusedLocationClient() {
+        return mFusedLocationClient;
+    }
+
+    public void setmFusedLocationClient(FusedLocationProviderClient mFusedLocationClient) {
+        this.mFusedLocationClient = mFusedLocationClient;
     }
 }
