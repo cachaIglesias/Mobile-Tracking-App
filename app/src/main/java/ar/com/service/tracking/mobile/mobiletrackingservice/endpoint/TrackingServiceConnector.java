@@ -1,8 +1,13 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.gustavofao.jsonapi.JSONApiConverter;
 import com.gustavofao.jsonapi.Models.ErrorModel;
 import com.gustavofao.jsonapi.Models.JSONApiObject;
@@ -69,14 +74,14 @@ public class TrackingServiceConnector {
 
     }
 
-    public void getEntregaActiva(Integer deliveryManID, OrderAdapter orderAdapter){
+    public void getEntregaActiva(Integer deliveryManID, OrderAdapter orderAdapter, List<MarkerOptions> markers, GoogleMap map, PolylineOptions polylineOptions){
 
-        OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter);
-        ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
-        setCall(getService().getEntregaActiva(deliveryManID));
-        // forma asincronica
-        getCall().enqueue(responseObject);
-        // forma sincronica
+            OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter, markers, map, polylineOptions);
+            ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
+            setCall(getService().getEntregaActiva(deliveryManID));
+            // forma asincronica
+            getCall().enqueue(responseObject);
+            // forma sincronica
 //        try {
 //            Response<JSONApiObject> response = getCall().execute();
 //            responseObject.onResponse(getCall(),response);

@@ -1,6 +1,7 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.gustavofao.jsonapi.JSONApiConverter;
@@ -21,6 +22,8 @@ import retrofit2.Response;
  * Created by miglesias on 15/07/17.
  */
 public class ResponseObject implements Callback<JSONApiObject>{
+
+    private static String TAG = "ResponseObject";
 
     private Context context;
     private AbstractTrackingServiceObserver observer;
@@ -79,6 +82,7 @@ public class ResponseObject implements Callback<JSONApiObject>{
     @Override
     public void onFailure(Call<JSONApiObject> call, Throwable t) {
         // handle failure
+        Log.e(TAG, t.getMessage());
         Toast.makeText(getContext(), "Falla en la conexción con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
     }
 
