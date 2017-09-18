@@ -87,8 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private List<MarkerOptions> markers = new LinkedList<MarkerOptions>();
 
-    /** Defines callbacks for service binding, passed to bindService() */
-//    private ServiceConnection mConnection = new ServiceConnection() {
+    //    private ServiceConnection mConnection = new ServiceConnection() {
 //
 //        @Override
 //        public void onServiceConnected(ComponentName className, IBinder service) {
@@ -214,12 +213,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
 
         // Bind to LocalService
-        mConnection = GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMarkers(), MapsActivity.this, MapsActivity.this);
-        if(mConnection.ismBound()){
-            mConnection.updateMap(this.getMap());
-            this.setPolylineOptions(mConnection.getPolylineOptions());
-            this.setMarkers(mConnection.getMarkers());
-            this.setmService(mConnection.getmService());
+        setmConnection(GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMarkers(), MapsActivity.this, MapsActivity.this));
+        if(getmConnection().ismBound()){
+            getmConnection().updateMap(this.getMap());
+            this.setPolylineOptions(getmConnection().getPolylineOptions());
+            this.setMarkers(getmConnection().getMarkers());
+            this.setmService(getmConnection().getmService());
             this.setmBound(true);
 //            mConnection = GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMarkers(), MapsActivity.this, MapsActivity.this);
 //            Intent intent = new Intent(this, GPSservice.class);
@@ -359,7 +358,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        positions.add(new Position(-34.915785193435504, -57.943846341222525));
 //        positions.add(new Position(-34.915934752219066, -57.94367467984557));
 
-        TrackingServiceConnector.getInstance(MapsActivity.this).nuevasPosiciones(3, positions);
+        TrackingServiceConnector.getInstance(MapsActivity.this, null).nuevasPosiciones(3, positions);
     }
 
     public void enviarPosiciones(View view){
@@ -368,71 +367,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (button.getText().equals(getResources().getString(R.string.pause))) {
 
-//            mService.stopGPSUpdates();
+            if( this.getAdapter().isEmpty() ){
+                // detengo el servicio background de actualizacion de posiciones gps
+                this.getmConnection().stopGPSUpdates();
+                // detengo la solucitud de entregas activas cada 1 minuto
+                this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
 
-            // libera el servicio background de actualizacion de posiciones gps
-//            if (ismBound()) {
-//                unbindService(mConnection);
-//                setmBound(false);
-//            }
-//             TODO > frenar Google Play Services Location
-//            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-//            getmService().stopGPSUpdates();
-
-            button.setText(R.string.deliver);
-
-            this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
+                button.setText(R.string.deliver);
+            }else{
+                MessageHelper.showOnlyAlert(this, "Atención!", "Existen ordenes sin repartir, por lo que no es posible pausar la entrega");
+            }
 
         } else {
 
-            if(!this.getAdapter().isEmpty()){
-
-                MessageHelper.showOnlyAlert(this, "Atención!", "Existen ordenes sin repartir, por lo que la lista de ordenes no se actualizará");
-
-            }else{
-
-                try{
-                    TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, this.getAdapter(), this.getMarkers(), this.getMap(), this.getPolylineOptions());
-                }catch (Exception e){
-                    Log.e(TAG, "No se pudo recuperar una entrega activa");
-                    MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
-                }
-
-                this.obtenerEntregaActivaCadaUnMinuto();
-
+            try{
+                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(3, this.getAdapter(), this.getMarkers(), this.getMap(), this.getPolylineOptions());
+            }catch (Exception e){
+                Log.e(TAG, "No se pudo recuperar una entrega activa");
+                MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
             }
+
+            this.obtenerEntregaActivaCadaUnMinuto();
 
             // limpiar pililyne
             setPolylineOptions(new PolylineOptions().geodesic(true).visible(true).width(8).color(Color.RED));
             getMap().addPolyline(getPolylineOptions());
 
-//            // Bind to LocalService
-            mConnection = GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMarkers(), MapsActivity.this, MapsActivity.this);
-            if(!mConnection.ismBound()){
+            // Bind to LocalService
+            setmConnection(GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMarkers(), MapsActivity.this, MapsActivity.this));
+            if(!getmConnection().ismBound()){
                 Intent intent = new Intent(this, GPSservice.class);
-                bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                bindService(intent, getmConnection(), Context.BIND_AUTO_CREATE);
                 this.setmBound(true);
             }
-//            else{
-//                this.setMap(mConnection.getMap());
-//                this.setPolylineOptions(mConnection.getPolylineOptions());
-//                this.setMarkers(mConnection.getMarkers());
-//                this.setmService(mConnection.getmService());
-//                this.setmBound(true);
-//            }
-//            getmService().generateLocationClient();
-            // TODO > Iniciar Google Play Services Location
-//            this.generateLocationClient();
-
-// TODO > servicio en primer plano, pone en la barra de notificaciones iconito para avisar que se esta realizando el seguimiento gps
-//            Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
-//                    System.currentTimeMillis());
-//            Intent notificationIntent = new Intent(this, GPSservice.class);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-//            notification.setLatestEventInfo(this, getText(R.string.notification_title),
-//                    getText(R.string.notification_message), pendingIntent);
-//            int ONGOING_NOTIFICATION_ID = 1;
-//            startForeground(ONGOING_NOTIFICATION_ID, notification);
 
             button.setText(R.string.pause);
 
@@ -535,7 +502,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run() {
                         try {
                             //Ejecuta tu AsyncTask!
-                            TrackingServiceConnector.getInstance(MapsActivity.this).getEntregaActiva(3, getAdapter(), getMarkers(), getMap(), getPolylineOptions());
+                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(3, getAdapter(), getMarkers(), getMap(), getPolylineOptions());
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
                             MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa cada 1 minuto", Toast.LENGTH_SHORT);
@@ -726,5 +693,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void setmBound(boolean mBound) {
         this.mBound = mBound;
+    }
+
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    public GPSServiceConnection getmConnection() {
+        return mConnection;
+    }
+
+    public void setmConnection(GPSServiceConnection mConnection) {
+        this.mConnection = mConnection;
     }
 }

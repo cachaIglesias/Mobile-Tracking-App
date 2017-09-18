@@ -48,7 +48,7 @@ public class OrderAdapter extends ArrayAdapter<Order> {
 
                 MessageHelper.toast(getContext(), "seleccione la orden numero: " + position, Toast.LENGTH_SHORT);
 
-                final TrackingServiceConnector instancia = TrackingServiceConnector.getInstance(getContext());
+                final TrackingServiceConnector instancia = TrackingServiceConnector.getInstance(getContext(), null);
 
                 String title = "Llegaste a destino !?";
                 String message = "Pudiste entregar la orden de " + order.getProducto() + "a " + order.getDestinatario();

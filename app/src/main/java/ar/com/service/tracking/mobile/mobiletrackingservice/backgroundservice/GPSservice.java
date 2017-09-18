@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
@@ -38,18 +39,21 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 public class GPSservice extends Service {
 
-    private LocationManager locationManager;
+    private static final String TAG = "GPSService";
+
     private PolylineOptions polylineOptions;
     private GoogleMap map;
     private List<MarkerOptions> markers;
 
-//    private Geocoder geocoder;
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
@@ -69,7 +73,6 @@ public class GPSservice extends Service {
 
     public void setParameters(PolylineOptions activiyMapPolylineOptions, GoogleMap activiyMapMap, List<MarkerOptions> markers, Activity activity) {
 
-//        locationManager = activiyMapLocationManager;
         setPolylineOptions(activiyMapPolylineOptions);
         setMap(activiyMapMap);
         setMarkers(markers);
@@ -77,74 +80,7 @@ public class GPSservice extends Service {
 
         sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
 
-//        geocoder = new Geocoder(this, Locale.getDefault());
-
     }
-
-//    public void startGPSUpdates() {
-//
-//        boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-//
-//        if (ACCESS_FINE_OK) {
-//
-//            Long segundos = Long.valueOf(getSharedPref().getString("minTime", "3").split(" ")[0]);
-//            Float metros = Float.valueOf(getSharedPref().getString("minDist", "10").split(" ")[0]);
-//
-//            getMap().setMyLocationEnabled(true);
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, segundos * 1000, metros, locationListenerGPS);
-//            MessageHelper.toast(this,"GPS provider started running", Toast.LENGTH_LONG);
-//
-//        }
-//
-//    }
-
-//    private final LocationListener locationListenerGPS = new LocationListener() {
-//
-//        private double longitudeGPS, latitudeGPS;
-//        private LatLng centrar;
-//
-//        public void onLocationChanged(Location location) {
-//
-//            longitudeGPS = location.getLongitude();
-//            latitudeGPS = location.getLatitude();
-//            centrar = new LatLng(latitudeGPS, longitudeGPS);
-//
-//            String zoom = getSharedPref().getString("centerZoom", "1").split(" ")[0];
-//
-//            getMap().clear();
-//            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
-////            map.addMarker(new MarkerOptions().position(centrar).title("Tu posición"));
-//
-//            getPolylineOptions().add(new LatLng(latitudeGPS, longitudeGPS));
-//            getMap().addPolyline(getPolylineOptions());
-//
-//            // TODO > Acomodar vez que este probado
-////            try{
-////                ArrayList<Position> positions = new ArrayList<Position>();
-////                positions.add(new Position(latitudeGPS, longitudeGPS));
-////                TrackingServiceConnector.getInstance(GPSservice.this).nuevasPosiciones(3, positions);
-////            }catch (Exception e){
-////                MessageHelper.toast(GPSservice.this, "No se pudo enviar una posicion GPS", Toast.LENGTH_SHORT);
-////            }
-//
-//            Toast.makeText(GPSservice.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
-//
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String s, int i, Bundle bundle) {
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String s) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String s) {
-//
-//        }
-//    };
 
     public void stopGPSUpdates(){
 
@@ -153,8 +89,7 @@ public class GPSservice extends Service {
             this.getmFusedLocationClient().removeLocationUpdates(this.getmLocationCallback());
         }
 
-//        locationManager.removeUpdates(locationListenerGPS);
-        MessageHelper.toast(this,"GPS provider stoped", Toast.LENGTH_LONG);
+        Log.w(TAG, "Servicio GPS background detenido");
 
     }
 
@@ -193,19 +128,28 @@ public class GPSservice extends Service {
                     latitudeGPS = location.getLatitude();
                     centrar = new LatLng(latitudeGPS, longitudeGPS);
 
-                    String zoom = getSharedPref().getString("centerZoom", "1").split(" ")[0];
+                    // String zoom = getSharedPref().getString("centerZoom", "1").split(" ")[0];
 
                     getMap().clear();
                     getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
 
                     getPolylineOptions().add(new LatLng(latitudeGPS, longitudeGPS));
                     getMap().addPolyline(getPolylineOptions());
+
+                    try{
+                        ArrayList<Position> positions = new ArrayList<Position>();
+                        positions.add(new Position(latitudeGPS, longitudeGPS));
+                        TrackingServiceConnector.getInstance(GPSservice.this, null).nuevasPosiciones(3, positions);
+                    }catch (Exception e){
+                        Log.e(TAG, "No se pudo enviar una posicion GPS, Error: " + e.toString());
+                        MessageHelper.toast(GPSservice.this, "No se pudo enviar una posicion GPS", Toast.LENGTH_SHORT);
+                    }
+
                     for (MarkerOptions markerOptions: getMarkers()) {
                         Marker marker = getMap().addMarker(markerOptions);
                         marker.setTag("");
                     }
 
-                    MessageHelper.toast(GPSservice.this, "Ultima latitud> " + String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT );
                 }
             };
         };
@@ -253,6 +197,8 @@ public class GPSservice extends Service {
             }
         });
 
+        Log.w(TAG, "Servicio GPS background iniciado");
+
     }
 
     public SharedPreferences getSharedPref() {
@@ -262,7 +208,6 @@ public class GPSservice extends Service {
     public void setSharedPref(SharedPreferences sharedPref) {
         this.sharedPref = sharedPref;
     }
-
 
     public PolylineOptions getPolylineOptions() {
         return polylineOptions;
@@ -279,7 +224,6 @@ public class GPSservice extends Service {
     public void setMap(GoogleMap map) {
         this.map = map;
     }
-
 
     public FusedLocationProviderClient getmFusedLocationClient() {
         return mFusedLocationClient;
@@ -305,7 +249,6 @@ public class GPSservice extends Service {
         this.mLocationCallback = mLocationCallback;
     }
 
-
     public List<MarkerOptions> getMarkers() {
         return markers;
     }
@@ -313,7 +256,6 @@ public class GPSservice extends Service {
     public void setMarkers(List<MarkerOptions> markers) {
         this.markers = markers;
     }
-
 
     public Activity getActivity() {
         return activity;
@@ -327,4 +269,5 @@ public class GPSservice extends Service {
         map.addPolyline(this.getPolylineOptions());
         this.setMap(map);
     }
+
 }

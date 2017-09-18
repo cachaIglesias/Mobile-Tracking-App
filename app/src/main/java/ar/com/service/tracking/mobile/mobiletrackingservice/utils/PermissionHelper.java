@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
@@ -13,6 +14,8 @@ import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
  */
 
 public class PermissionHelper {
+
+    private static final String TAG = "PermissionHelper";
 
     /**
      *  @method Permite saber si una funcionalidad esta disponible en el dispositivo
@@ -43,12 +46,13 @@ public class PermissionHelper {
                     permission)) {
 
                 // TODO: ver como hacer para cuando sale este mensaje y se de continuar, se vea el de solicitud de permiso pero que no se vean los dos a la vez en la pantalla.
+                Log.i(TAG, "Se ejecutó PermissionHelper: verificarSiExistePermisoYSolicitarSiEsNecesario | " + explanationMessage);
                 MessageHelper.showOnlyAlert((Activity) context, title, explanationMessage);
 
             } else{
 
                 ActivityCompat.requestPermissions((Activity) context, new String[]{permission}, requestCode);
-
+                Log.w(TAG, "Se ejecutó PermissionHelper: verificarSiExistePermisoYSolicitarSiEsNecesario | Permission: " + permission);
             }
 
         }

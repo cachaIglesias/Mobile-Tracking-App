@@ -73,23 +73,18 @@ public class GPSServiceConnection implements ServiceConnection {
         setBinder((GPSbinder) service);
         setmService(getBinder().getService());
         getmService().setParameters(getPolylineOptions(), getMap(), getMarkers(), this.getActivity());
-
-        Log.e(TAG, "Conexion con servicio GPS background establecida");
         setmBound(true);
-        // if (mBound){
+
+        Log.w(TAG, "Conexion con servicio GPS background establecida");
+
         // siempre agregar esta excepcion que es la unica que tira los serivcios y ocurre cuando se pierde la coneccion: DeadObjectException
-        Log.e(TAG, "Servicio GPS background iniciado");
         // se llama al servicio de actualizacion de posicones geograficas GPS o GPSA.
-//        getmService().generateLocationClient();
         this.generateLocationClient();
-        //TODO >
-//            startLocationUpdates();
-        // }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
-        Log.e(TAG, "Conexion con servicio GPS background terminada");
+        Log.w(TAG, "Conexion con servicio GPS background terminada");
         this.stopGPSUpdates();
         setmBound(false);
     }

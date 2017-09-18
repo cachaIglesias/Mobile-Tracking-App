@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,12 +46,17 @@ public class ResponseObject implements Callback<JSONApiObject>{
         // handle success
         if (response.body() != null) {
             if (response.body().hasErrors()) {
-                //Do something with the errors
-                List<ErrorModel> errorList = response.body().getErrors();
+                // Do something with the errors
+                // List<ErrorModel> errorList = response.body().getErrors();
+                Log.e(TAG, "Objeto respuesta con errores: " + response.body().getErrors().toString());
+                MessageHelper.toast(getContext(), "Objeto respuesta con errores: " + response.body().getErrors().toString(), Toast.LENGTH_SHORT);
+
             } else {
-//                Toast.makeText(getContext(), response.body().getData().toString(), Toast.LENGTH_LONG).show();
+
                 if (response.body().getData().size() > 0) {
-                    Toast.makeText(getContext(), "Object With data", Toast.LENGTH_SHORT).show();
+
+                    Log.i(TAG, "Objeto respuesta con datos: " + response.body().getData().toString());
+
                     if (response.body().getData().size() == 1) {
                         //Single Object
                         this.getResponseObjectList().add(response.body().getData(0));
@@ -60,30 +66,38 @@ public class ResponseObject implements Callback<JSONApiObject>{
                             this.getResponseObjectList().add(resource);
                         }
                     }
+
                     this.notifyObserver();
+
                 } else {
-                    Toast.makeText(getContext(), "No Items", Toast.LENGTH_SHORT).show();
+
+                    Log.w(TAG, "Objeto respuesta sin datos");
+                    MessageHelper.toast(getContext(), "Objeto respuesta sin datos", Toast.LENGTH_SHORT);
+
                 }
             }
         } else {
+
             try {
                 // manejar el error
                 // JSONApiConverter jsonApiConverter = new JSONApiConverter(Order.class);
                 // JSONApiObject object = jsonApiConverter.fromJson(response.errorBody().string());
                 // handleErrors(object.getErrors());
-                response.errorBody().string();
-                Toast.makeText(getContext(), "Error Body", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Objeto respuesta sin cuerpo: " + response.errorBody().string());
+                MessageHelper.toast(getContext(), "Objeto respuesta sin cuerpo: " + response.errorBody().string(), Toast.LENGTH_SHORT);
             } catch (IOException e) {
-                Toast.makeText(getContext(), "Empty Body", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Objeto respuesta sin cuerpo");
+                MessageHelper.toast(getContext(), "Objeto respuesta sin cuerpo", Toast.LENGTH_SHORT);
             }
+
         }
     }
 
     @Override
     public void onFailure(Call<JSONApiObject> call, Throwable t) {
         // handle failure
-        Log.e(TAG, t.getMessage());
-        Toast.makeText(getContext(), "Falla en la conexción con el servicio de posicionamiento. " + "error: " + t.toString(), Toast.LENGTH_SHORT).show();
+        Log.e(TAG, "Falla en la conexción con el servicio de posicionamiento. Error: " + t.toString() + " | " + t.getMessage());
+        Toast.makeText(getContext(), "Falla en la conexción con el servicio de posicionamiento. Error: " + t.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private void notifyObserver() {
@@ -100,7 +114,6 @@ public class ResponseObject implements Callback<JSONApiObject>{
     public void setContext(Context context) {
         this.context = context;
     }
-
 
     public ArrayList<Resource> getResponseObjectList() {
         return responseObjectList;

@@ -1,29 +1,22 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.gustavofao.jsonapi.JSONApiConverter;
-import com.gustavofao.jsonapi.Models.ErrorModel;
 import com.gustavofao.jsonapi.Models.JSONApiObject;
-import com.gustavofao.jsonapi.Models.Resource;
+import com.gustavofao.jsonapi.Models.JSONList;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Trace;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
-import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by miglesias on 16/07/17.
@@ -31,8 +24,11 @@ import retrofit2.Response;
 
 public class TrackingServiceConnector {
 
+    private static String TAG = "TrackingServiceCon";
+
     private static TrackingServiceConnector instance = null;
     private Context lastContext = null;
+    private Activity lastActivity = null;
     private Call<JSONApiObject> call;
     private TrackingService service;
 
@@ -40,13 +36,14 @@ public class TrackingServiceConnector {
         // Exists only to defeat instantiation.
     }
 
-    public static TrackingServiceConnector getInstance(Context context) {
+    public static TrackingServiceConnector getInstance(Context context, Activity activity) {
 
         if(instance == null) {
             instance = new TrackingServiceConnector();
             instance.configurar();
         }
         instance.setLastContext(context);
+        instance.setLastActivity(activity);
         return instance;
 
     }
@@ -63,6 +60,8 @@ public class TrackingServiceConnector {
         this.setCall(getService().marcarComoFinalizado(orderID));
         this.getCall().enqueue(responseObject);
 
+        Log.w(TAG, "Servicio HTTP utilizado: marcarComoFinalizado");
+
     }
 
 
@@ -72,11 +71,14 @@ public class TrackingServiceConnector {
         this.setCall(getService().marcarComoCancelado(orderID));
         this.getCall().enqueue(responseObject);
 
+        Log.w(TAG, "Servicio HTTP utilizado: marcarComoCancelado");
+
     }
 
-    public void getEntregaActiva(Integer deliveryManID, OrderAdapter orderAdapter, List<MarkerOptions> markers, GoogleMap map, PolylineOptions polylineOptions){
+    public void obtenerEntregaActiva(Integer deliveryManID, OrderAdapter orderAdapter, List<MarkerOptions> markers, GoogleMap map, PolylineOptions polylineOptions){
 
-            OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter, markers, map, polylineOptions);
+        GeofenceTransitionService geofenceTransitionService = GeofenceTransitionService.getInstance(this.getLastActivity());
+            OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter, markers, map, polylineOptions, geofenceTransitionService);
             ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
             setCall(getService().getEntregaActiva(deliveryManID));
             // forma asincronica
@@ -89,13 +91,18 @@ public class TrackingServiceConnector {
 //            e.printStackTrace();
 //        }
 
+        Log.w(TAG, "Servicio HTTP utilizado: obtenerEntregaActiva");
+
     }
 
     public void nuevasPosiciones(Integer deliveryManID, List<Position> positions){
 
         ResponseObject responseObject = new ResponseObject(getLastContext());
-        setCall(getService().nuevasPosiciones(deliveryManID, positions));
+
+        setCall(getService().nuevasPosiciones(new Trace(positions.get(0), 3)));
         getCall().enqueue(responseObject);
+
+        Log.w(TAG, "Servicio HTTP utilizado: nuevasPosiciones");
 
     }
 
@@ -105,6 +112,14 @@ public class TrackingServiceConnector {
 
     public void setLastContext(Context lastContext) {
         this.lastContext = lastContext;
+    }
+
+    public Activity getLastActivity() {
+        return lastActivity;
+    }
+
+    public void setLastActivity(Activity lastActivity) {
+        this.lastActivity = lastActivity;
     }
 
     public Call<JSONApiObject> getCall() {
