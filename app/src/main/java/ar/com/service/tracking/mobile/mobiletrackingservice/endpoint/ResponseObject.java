@@ -47,9 +47,13 @@ public class ResponseObject implements Callback<JSONApiObject>{
         if (response.body() != null) {
             if (response.body().hasErrors()) {
                 // Do something with the errors
-                // List<ErrorModel> errorList = response.body().getErrors();
-                Log.e(TAG, "Objeto respuesta con errores: " + response.body().getErrors().toString());
-                MessageHelper.toast(getContext(), "Objeto respuesta con errores: " + response.body().getErrors().toString(), Toast.LENGTH_SHORT);
+                List<ErrorModel> errorList = response.body().getErrors();
+                /** Cuando se llama a un servicio que no recibe respuesta, se produce un Error en JSCONApiConverter@103 porque no tiene ninguna json para convertir.
+                 por lo que el JSONApiObject del response tiene la marca que tuvo errores pero en el cuerpo no contiene errores. */
+                if (errorList != null){
+                    Log.e(TAG, "Objeto respuesta con errores: " + response.body().getErrors().toString());
+                    MessageHelper.toast(getContext(), "Objeto respuesta con errores: " + response.body().getErrors().toString(), Toast.LENGTH_SHORT);
+                }
 
             } else {
 
