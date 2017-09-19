@@ -1,11 +1,13 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,6 +22,8 @@ import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 public class SettingsActivity extends FragmentActivity implements AdapterView.OnItemSelectedListener {
 
+    private static final String TAG = "SettingsActivity";
+
     private SharedPreferences sharedPref;
 
     @Override
@@ -32,6 +36,8 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
         inicializarMinTimeSpinner();
         inicializarMinDistSpinner();
 
+        Log.i(TAG, "Inicio de la actividad: " + TAG) ;
+
     }
 
     private void inicializarMinTimeSpinner() {
@@ -43,6 +49,7 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 getSharedPref().edit().putString("minTime", (String) adapterView.getSelectedItem()).commit();
                 getSharedPref().edit().putInt("minTimeSpinnerPosition", i).commit();
+                Log.i(TAG, "Se seleccionó tiempo minimo de actualización de posicion GPS: " + (String) adapterView.getSelectedItem()) ;
             }
 
             @Override
@@ -81,6 +88,7 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 getSharedPref().edit().putString("minDist", (String) adapterView.getSelectedItem()).commit();
                 getSharedPref().edit().putInt("minDistSpinnerPosition", i).commit();
+                Log.i(TAG, "Se seleccionó la distancia minimo de actualización de posicion GPS: " + (String) adapterView.getSelectedItem()) ;
             }
 
             @Override
@@ -119,6 +127,8 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
 //        finish();
 
         onBackPressed();
+
+        Log.i(TAG, "Fin de la actividad: " + TAG) ;
 
     }
 

@@ -42,8 +42,8 @@ public class GeofenceTransitionService implements
 
     private static final String TAG = "GeofenceTransitionS";
 
-    private static int GEOFENCE_EXPIRATION_IN_MILLISECONDS = 3000;
-    private static int GEOFENCE_RADIUS_IN_METERS = 150;
+    private int GEOFENCE_EXPIRATION_IN_MILLISECONDS = 3000;
+    private int GEOFENCE_RADIUS_IN_METERS = 150;
 
     private List<Geofence> mGeofenceList;
     private GeofencingClient mGeofencingClient;
@@ -61,10 +61,12 @@ public class GeofenceTransitionService implements
 
     }
 
-    public static GeofenceTransitionService getInstance(Activity activity) {
+    public static GeofenceTransitionService getInstance(Activity activity, int metros, int segundos) {
 
         if(instance == null) {
             instance = new GeofenceTransitionService(activity);
+            instance.GEOFENCE_RADIUS_IN_METERS = metros;
+            instance.GEOFENCE_EXPIRATION_IN_MILLISECONDS = segundos * 1000 ;
         }
         return instance;
 
