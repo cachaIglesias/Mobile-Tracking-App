@@ -103,7 +103,7 @@ public class TrackingServiceConnector {
 
         ResponseObject responseObject = new ResponseObject(getLastContext());
 
-        setCall(getService().nuevasPosiciones(new Trace(positions.get(0), 3)));
+        setCall(getService().nuevasPosiciones(new Trace(positions.get(0), deliveryManID)));
         getCall().enqueue(responseObject);
 
         Log.w(TAG, "Servicio HTTP utilizado: nuevasPosiciones");

@@ -12,8 +12,7 @@
          location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />-->
-    <!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
@@ -40,6 +39,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <meta-data
+            android:name="com.google.android.awareness.API_KEY"
+            android:value="AIzaSyACm2dty81JRtr37OMFixC65LjCSLJWqB0"/>
+
         <activity android:name=".activity.MapsActivity">
 
             <!-- android:label="@string/title_activity_maps"> -->
@@ -60,6 +63,12 @@
             android:exported="false"/>
 
         <activity android:name=".activity.SettingsActivity"></activity>
+
+        <receiver android:name=".backgroundservice.ActivityFenceReceiver" >
+            <intent-filter>
+                <action android:name="ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.FENCE_RECEIVER_ACTION" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

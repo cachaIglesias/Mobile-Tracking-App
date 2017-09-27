@@ -2,8 +2,10 @@ package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,9 +19,17 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.fence.AwarenessFence;
+import com.google.android.gms.awareness.fence.DetectedActivityFence;
+import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.ActivityRecognitionResult;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -66,6 +76,12 @@ public class GPSservice extends Service {
 
     private Activity activity;
 
+    private GoogleApiClient mGoogleApiClient = null;
+
+    private ActivityFence activityFence;
+
+    private final static String FENCE_RECEIVER_ACTION = "ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.FENCE_RECEIVER_ACTION";
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -79,6 +95,15 @@ public class GPSservice extends Service {
         setActivity(activity);
 
         sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
+
+//        activityFence = new ActivityFence(activity);
+//
+//        Intent intent = new Intent(FENCE_RECEIVER_ACTION);
+//        activityFence.setMyPendingIntent(PendingIntent.getBroadcast(activity, 0, intent, 0));
+//        activityFence.setActivityFenceReceiver(new ActivityFenceReceiver());
+//        this.registerReceiver(activityFence.getActivityFenceReceiver(), new IntentFilter(FENCE_RECEIVER_ACTION));
+//
+//        activityFence.startFence();
 
     }
 
@@ -166,7 +191,7 @@ public class GPSservice extends Service {
 
                 if (ACCESS_FINE_OK) {
 
-                    getmFusedLocationClient().requestLocationUpdates(getmLocationRequest(), getmLocationCallback(), null /* Looper */);
+                  getmFusedLocationClient().requestLocationUpdates(getmLocationRequest(), getmLocationCallback(), null /* Looper */);
                 }
             }
         });
@@ -198,6 +223,43 @@ public class GPSservice extends Service {
         });
 
         Log.w(TAG, "Servicio GPS background iniciado");
+
+//        if (mGoogleApiClient == null){
+//
+//            mGoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
+//                    .addApi(Awareness.API)
+//                    .build();
+//            mGoogleApiClient.connect();
+//
+//            Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
+//                    .setResultCallback(new ResultCallback<DetectedActivityResult>() {
+//                        @Override
+//                        public void onResult(@NonNull DetectedActivityResult detectedActivityResult) {
+//                            if (!detectedActivityResult.getStatus().isSuccess()) {
+//                                Log.e(TAG, "Could not get the current activity.");
+//                                return;
+//                            }
+//                            ActivityRecognitionResult ar = detectedActivityResult.getActivityRecognitionResult();
+//                            DetectedActivity probableActivity = ar.getMostProbableActivity();
+//                            Log.e(TAG, probableActivity.toString());
+//                            MessageHelper.showOnlyAlert(getActivity(),"aviso","se la actividad! : " + probableActivity.toString());
+//                        }
+//                    });
+//
+//        }
+
+//        Awareness.SnapshotApi.getLocation(mGoogleApiClient)
+//                .setResultCallback(new ResultCallback<LocationResult>() {
+//                    @Override
+//                    public void onResult(@NonNull LocationResult locationResult) {
+//                        if (!locationResult.getStatus().isSuccess()) {
+//                            Log.e(TAG, "Could not get location.");
+//                            return;
+//                        }
+//                        Location location = locationResult.getLocation();
+//                        Log.i(TAG, "Lat: " + location.getLatitude() + ", Lng: " + location.getLongitude());
+//                    }
+//                });
 
     }
 

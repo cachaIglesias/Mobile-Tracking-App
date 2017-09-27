@@ -26,7 +26,7 @@ public interface TrackingService {
 
     // mascara que identifica a LocalHost en Android > "http://10.0.2.2:3000/"
     public static final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/")
+            .baseUrl("http://10.0.2.2:3000")
             .addConverterFactory(JSONConverterFactory.create(classes))
             .build();
 

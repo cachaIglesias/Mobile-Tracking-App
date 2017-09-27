@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
@@ -30,6 +31,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
     private GoogleMap map;
     private PolylineOptions polylineOptions;
     private GeofenceTransitionService geofenceTransitionService;
+    private Business business;
 
     public OrderTrackingServiceObserver(OrderAdapter orderAdapter, List<MarkerOptions> markers, GoogleMap map, PolylineOptions polylineOptions, GeofenceTransitionService geofenceTransitionService){
         this.setOrderAdapter(orderAdapter);
@@ -48,50 +50,58 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
         try{
 
-            for (Resource resource: this.getResponseObjectList()) {
+            for (int i = 0 ; i <= this.getResponseObjectList().size() - 1; i++){
+                if(i == 0){
 
-                Order order = (Order) resource;
+                    Business business = (Business) this.getResponseObjectList().get(i);
+                    this.setBusiness(business);
 
-                Boolean cambioDeEstado = false;
-                int orderIndex = adapterOrders.indexOf(order);
-                if (orderIndex != -1) {
-                    cambioDeEstado = adapterOrders.get(adapterOrders.indexOf(order)).getStatus().compareTo(order.getStatus()) != 0;
-                }
-                Boolean esUnEstadoFinal = order.getStatus().equalsIgnoreCase("canceled") || order.getStatus().equalsIgnoreCase("suspended") || order.getStatus().equalsIgnoreCase("finalized");
+                }else{
 
-                if (!esUnEstadoFinal) {
-                    posicion += 1;
-                }
+                    Order order = (Order) this.getResponseObjectList().get(i);
 
-                if (adapterOrders.contains(order)) {
-                    if (cambioDeEstado && esUnEstadoFinal) {
-                        adapterOrders.remove(order);
-                        Log.w(TAG, "Se removió la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
-                        // this.getOrderAdapter().remove(order);
-                        this.getMarkers().remove(orderIndex);
-                        Log.w(TAG, "Se removió el marcador de la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
-
-                        // TODO > removar GEOFENCE de la orden eliminada.
-                        Log.w(TAG, "Se removió el Geofence de la orden: " + order.toString() );
-
-                        notificar = true;
+                    Boolean cambioDeEstado = false;
+                    int orderIndex = adapterOrders.indexOf(order);
+                    if (orderIndex != -1) {
+                        cambioDeEstado = adapterOrders.get(adapterOrders.indexOf(order)).getStatus().compareTo(order.getStatus()) != 0;
                     }
-                } else {
+                    Boolean esUnEstadoFinal = order.getStatus().equalsIgnoreCase("canceled") || order.getStatus().equalsIgnoreCase("suspended") || order.getStatus().equalsIgnoreCase("finalized");
+
                     if (!esUnEstadoFinal) {
-                        adapterOrders.add(posicion, order);
-                        Log.w(TAG, "Se agregó la orden: " + order.toString() + " | " + " En la posicion: " + posicion );
-                        this.getOrderAdapter().notifyDataSetChanged();
-
-                        LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
-                        this.getMarkers().add(new MarkerOptions().position(position).title(order.getAddress()));
-                        Log.w(TAG, "Se agregó el marcador de la orden: " + order.toString() + " | " + " En la posicion: " + orderIndex);
-
-                        this.getGeofenceTransitionService().addGeofence(order.getAddress(), position);
-                        Log.w(TAG, "Se agregó el Geofence de la orden: " + order.toString() );
-
-                        // this.getOrderAdapter().add(order);
-                        notificar = true;
+                        posicion += 1;
                     }
+
+                    if (adapterOrders.contains(order)) {
+                        if (cambioDeEstado && esUnEstadoFinal) {
+                            adapterOrders.remove(order);
+                            Log.w(TAG, "Se removió la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
+                            // this.getOrderAdapter().remove(order);
+                            this.getMarkers().remove(orderIndex);
+                            Log.w(TAG, "Se removió el marcador de la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
+
+                            // TODO > remover GEOFENCE de la orden eliminada.
+                            Log.w(TAG, "Se removió el Geofence de la orden: " + order.toString() );
+
+                            notificar = true;
+                        }
+                    } else {
+                        if (!esUnEstadoFinal) {
+                            adapterOrders.add(posicion, order);
+                            Log.w(TAG, "Se agregó la orden: " + order.toString() + " | " + " En la posicion: " + posicion );
+                            this.getOrderAdapter().notifyDataSetChanged();
+
+                            LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
+                            this.getMarkers().add(new MarkerOptions().position(position).title(order.getAddress()));
+                            Log.w(TAG, "Se agregó el marcador de la orden: " + order.toString() + " | " + " En la posicion: " + orderIndex);
+
+                            this.getGeofenceTransitionService().addGeofence(order.getAddress(), position);
+                            Log.w(TAG, "Se agregó el Geofence de la orden: " + order.toString() );
+
+                            // this.getOrderAdapter().add(order);
+                            notificar = true;
+                        }
+                    }
+
                 }
             }
 
@@ -157,5 +167,13 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
     public void setGeofenceTransitionService(GeofenceTransitionService geofenceTransitionService) {
         this.geofenceTransitionService = geofenceTransitionService;
+    }
+
+    public Business getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(Business business) {
+        this.business = business;
     }
 }
