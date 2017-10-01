@@ -28,11 +28,20 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.TravelMode;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -297,7 +306,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (button.getText().equals(getResources().getString(R.string.pause))) {
 
-            if( getMapsActivityState().getAdapter().isEmpty() ){
+           if( getMapsActivityState().getAdapter().isEmpty() ){
                 // detengo el servicio background de actualizacion de posiciones gps
                 // TODO > ver que onda este medoto !
                 this.getmConnection().stopGPSUpdates();
@@ -305,10 +314,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
 
                 button.setText(R.string.deliver);
-            }else{
+           }else{
                 Log.i(TAG, "Existen ordenes sin repartir, por lo que no es posible pausar la entrega");
                 MessageHelper.showOnlyAlert(this, "Atención!", "Existen ordenes sin repartir, por lo que no es posible pausar la entrega");
-            }
+           }
 
         } else {
 
@@ -437,9 +446,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Button button = findViewById(R.id.deliver_button);
         outState.putCharSequence("buttonState", button.getText());
 
-        // TODO > guardar lista de ordenes, markers
-        // para las cosas que se complican como el adaptador de ordenes y los markers, debo hacer un singleton que guarde el estado de la actividad para consultarlo cuando esta retorne.
-
     }
 
     /**
@@ -453,8 +459,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Button button = findViewById(R.id.deliver_button);
         button.setText(savedInstanceState.getCharSequence("buttonState"));
-
-        // TODO > recuperar lista de ordenes, markers
 
     }
 

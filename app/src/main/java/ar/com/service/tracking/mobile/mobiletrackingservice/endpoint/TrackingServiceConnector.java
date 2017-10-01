@@ -82,11 +82,11 @@ public class TrackingServiceConnector {
 //        Float metros = Float.valueOf(getSharedPref().getString("minDist", "10").split(" ")[0]);
         // TODO : agregar los parametros distancia y tiempo de referzco del geofence a los datos que se deben tener en cuenta en la actividad de configuracion.
         GeofenceTransitionService geofenceTransitionService = GeofenceTransitionService.getInstance(this.getLastActivity(), 150, 3);
-            OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter, markers, map, polylineOptions, geofenceTransitionService);
-            ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
-            setCall(getService().getEntregaActiva(deliveryManID));
+        OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(orderAdapter, markers, map, polylineOptions, geofenceTransitionService);
+        ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
+        setCall(getService().getEntregaActiva(deliveryManID));
             // forma asincronica
-            getCall().enqueue(responseObject);
+        getCall().enqueue(responseObject);
             // forma sincronica
 //        try {
 //            Response<JSONApiObject> response = getCall().execute();

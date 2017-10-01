@@ -1,18 +1,23 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.gustavofao.jsonapi.Models.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.util.Log;
 import android.widget.Toast;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPI;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPIObserver;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
@@ -53,8 +58,16 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
             for (int i = 0 ; i <= this.getResponseObjectList().size() - 1; i++){
                 if(i == 0){
 
-                    Business business = (Business) this.getResponseObjectList().get(i);
-                    this.setBusiness(business);
+                    this.setBusiness((Business) this.getResponseObjectList().get(i));
+
+                    LatLng position = new LatLng(this.getBusiness().getPosition().getLatitude(), this.getBusiness().getPosition().getLongitude());
+                    MarkerOptions markerOptions = new MarkerOptions().position(position)
+                            .title(this.getBusiness().getAddress())
+                            .snippet("Descipcion del negocio")
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.pizza_business))
+                            .alpha(0.7f);
+                    this.getMarkers().add(markerOptions);
+                    Log.w(TAG, "Se agregó el marcador del negocio: " + this.getBusiness().toString() );
 
                 }else{
 
@@ -91,7 +104,12 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             this.getOrderAdapter().notifyDataSetChanged();
 
                             LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
-                            this.getMarkers().add(new MarkerOptions().position(position).title(order.getAddress()));
+                            MarkerOptions markerOptions = new MarkerOptions().position(position)
+                                    .title(order.getAddress())
+                                    .snippet("Descipcion de la orden")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination))
+                                    .alpha(0.7f);
+                            this.getMarkers().add(markerOptions);
                             Log.w(TAG, "Se agregó el marcador de la orden: " + order.toString() + " | " + " En la posicion: " + orderIndex);
 
                             this.getGeofenceTransitionService().addGeofence(order.getAddress(), position);
@@ -122,7 +140,11 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
             // se inicia el servicio de Geofencing
             this.getGeofenceTransitionService().startGeofencingMonitoring();
 
-            // TODO > aca se deberia armar el recorrido
+            // se arma el recorrido
+            GoogleDirectionsAPIObserver googleDirectionsAPIObserver = new GoogleDirectionsAPIObserver(map);
+            GoogleDirectionsAPI googleDirectionsAPI = new GoogleDirectionsAPI(this.getOrderAdapter().getContext(), googleDirectionsAPIObserver);
+            googleDirectionsAPI.route(this.getBusiness(), this.getOrderAdapter());
+
             Log.i(TAG, "Recorrido del repartidor actualizado");
             MessageHelper.showOnlyAlert(this.getGeofenceTransitionService().getActivity(), "Atencion!", "Se actualizó la lista de ordenes, por lo tanto el recorrido sugerido tambien será actualizado." );
         }
