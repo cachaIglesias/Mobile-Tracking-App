@@ -52,6 +52,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
@@ -60,9 +61,8 @@ public class GPSservice extends Service {
 
     private static final String TAG = "GPSService";
 
-    private PolylineOptions polylineOptions;
+    private MapsActivityState mapsActivityState;
     private GoogleMap map;
-    private List<MarkerOptions> markers;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
@@ -87,12 +87,11 @@ public class GPSservice extends Service {
         return mBinder;
     }
 
-    public void setParameters(PolylineOptions activiyMapPolylineOptions, GoogleMap activiyMapMap, List<MarkerOptions> markers, Activity activity) {
+    public void setParameters(MapsActivityState mapsActivityState, GoogleMap activiyMapMap, Activity activity) {
 
-        setPolylineOptions(activiyMapPolylineOptions);
-        setMap(activiyMapMap);
-        setMarkers(markers);
-        setActivity(activity);
+        this.setMapsActivityState(mapsActivityState);
+        this.setMap(activiyMapMap);
+        this.setActivity(activity);
 
         sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
 
@@ -158,8 +157,13 @@ public class GPSservice extends Service {
                     getMap().clear();
                     getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
 
-                    getPolylineOptions().add(new LatLng(latitudeGPS, longitudeGPS));
-                    getMap().addPolyline(getPolylineOptions());
+                    getMapsActivityState().getRepartidorPolyline().add(new LatLng(latitudeGPS, longitudeGPS));
+
+                    getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
+
+                    if (getMapsActivityState().getEntregaPolyline() != null){
+                        getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
+                    }
 
                     try{
                         ArrayList<Position> positions = new ArrayList<Position>();
@@ -170,7 +174,7 @@ public class GPSservice extends Service {
                         MessageHelper.toast(GPSservice.this, "No se pudo enviar una posicion GPS", Toast.LENGTH_SHORT);
                     }
 
-                    for (MarkerOptions markerOptions: getMarkers()) {
+                    for (MarkerOptions markerOptions: getMapsActivityState().getMarkers()) {
                         Marker marker = getMap().addMarker(markerOptions);
                         marker.setTag("");
                     }
@@ -271,14 +275,6 @@ public class GPSservice extends Service {
         this.sharedPref = sharedPref;
     }
 
-    public PolylineOptions getPolylineOptions() {
-        return polylineOptions;
-    }
-
-    public void setPolylineOptions(PolylineOptions polylineOptions) {
-        this.polylineOptions = polylineOptions;
-    }
-
     public GoogleMap getMap() {
         return map;
     }
@@ -311,14 +307,6 @@ public class GPSservice extends Service {
         this.mLocationCallback = mLocationCallback;
     }
 
-    public List<MarkerOptions> getMarkers() {
-        return markers;
-    }
-
-    public void setMarkers(List<MarkerOptions> markers) {
-        this.markers = markers;
-    }
-
     public Activity getActivity() {
         return activity;
     }
@@ -328,8 +316,16 @@ public class GPSservice extends Service {
     }
 
     public void updateMap(GoogleMap map) {
-        map.addPolyline(this.getPolylineOptions());
+        map.addPolyline(this.getMapsActivityState().getRepartidorPolyline());
         this.setMap(map);
     }
 
+
+    public MapsActivityState getMapsActivityState() {
+        return mapsActivityState;
+    }
+
+    public void setMapsActivityState(MapsActivityState mapsActivityState) {
+        this.mapsActivityState = mapsActivityState;
+    }
 }

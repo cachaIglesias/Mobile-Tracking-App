@@ -4,8 +4,10 @@ import android.content.Context;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,7 +26,11 @@ public class MapsActivityState {
 
     private List<MarkerOptions> markers = new LinkedList<MarkerOptions>();
 
-    private OrderAdapter adapter;
+    private PolylineOptions repartidorPolyline;
+
+    private PolylineOptions entregaPolyline;
+
+    private OrderAdapter orderAdapter;
 
     private static MapsActivityState instance = null;
 
@@ -38,7 +44,7 @@ public class MapsActivityState {
     }
 
     public MapsActivityState(Context context){
-        this.adapter = new OrderAdapter(context, new LinkedList<Order>());
+        this.orderAdapter = new OrderAdapter(context, new LinkedList<Order>());
     }
 
 
@@ -50,11 +56,27 @@ public class MapsActivityState {
         this.markers = markers;
     }
 
-    public OrderAdapter getAdapter() {
-        return adapter;
+    public OrderAdapter getOrderAdapter() {
+        return orderAdapter;
     }
 
-    public void setAdapter(OrderAdapter adapter) {
-        this.adapter = adapter;
+    public void setOrderAdapter(OrderAdapter orderAdapter) {
+        this.orderAdapter = orderAdapter;
+    }
+
+    public PolylineOptions getRepartidorPolyline() {
+        return repartidorPolyline;
+    }
+
+    public void setRepartidorPolyline(PolylineOptions repartidorPolyline) {
+        this.repartidorPolyline = repartidorPolyline;
+    }
+
+    public PolylineOptions getEntregaPolyline() {
+        return entregaPolyline;
+    }
+
+    public void setEntregaPolyline(PolylineOptions entregaPolyline) {
+        this.entregaPolyline = entregaPolyline;
     }
 }

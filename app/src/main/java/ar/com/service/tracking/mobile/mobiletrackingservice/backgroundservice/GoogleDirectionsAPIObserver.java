@@ -1,6 +1,5 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
 
-import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
 
@@ -8,10 +7,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.List;
+
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 
 /**
  * Created by miglesias on 01/10/17.
@@ -22,16 +21,19 @@ public class GoogleDirectionsAPIObserver {
     private static final String TAG = "GoogleDirectionsAPI";
 
     private GoogleMap map;
-//    private List<LatLng> route;
+
+    private MapsActivityState mapsActivityState;
+
     private Handler handler = new Handler();
 
-    public GoogleDirectionsAPIObserver(GoogleMap map){
-        this.map = map;
+    public GoogleDirectionsAPIObserver(GoogleMap map, MapsActivityState mapsActivityState){
+        this.setMap(map);
+        this.setMapsActivityState(mapsActivityState);
     }
 
     public void notify(final List<LatLng> route) {
 
-        handler.post(new Runnable() {
+        getHandler().post(new Runnable() {
             @Override
             public void run() {
                 // Código a ejecutar
@@ -39,8 +41,9 @@ public class GoogleDirectionsAPIObserver {
                 polyOptions.color(0x7F00FF00);
                 polyOptions.width(15);
                 polyOptions.addAll(route);
-//                polyOptions.co/
-                Polyline polyline = map.addPolyline(polyOptions);
+                getMapsActivityState().setEntregaPolyline( polyOptions );
+                Polyline polyline = getMap().addPolyline(polyOptions);
+                polyline.getPoints().add(new LatLng(-34.934428, -57.963613));
 
                 Log.w(TAG, "Recorrido establecido");
             }
@@ -58,5 +61,30 @@ public class GoogleDirectionsAPIObserver {
 //                    }
 //                });
 
+    }
+
+
+    public GoogleMap getMap() {
+        return map;
+    }
+
+    public void setMap(GoogleMap map) {
+        this.map = map;
+    }
+
+    public MapsActivityState getMapsActivityState() {
+        return mapsActivityState;
+    }
+
+    public void setMapsActivityState(MapsActivityState mapsActivityState) {
+        this.mapsActivityState = mapsActivityState;
+    }
+
+    public Handler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Handler handler) {
+        this.handler = handler;
     }
 }

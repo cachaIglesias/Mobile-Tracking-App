@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 
 /**
@@ -32,37 +33,32 @@ public class GPSServiceConnection implements ServiceConnection {
     private GPSbinder binder;
     private boolean mBound = false;
 
-    private PolylineOptions polylineOptions;
+    private MapsActivityState mapsActivityState;
     private GoogleMap map;
-    private List<MarkerOptions> markers;
 
     private Activity activity = null;
     private Context lastContext = null;
 
     private static GPSServiceConnection instance = null;
 
-    public static GPSServiceConnection getInstance(PolylineOptions polylineOptions, GoogleMap map, List<MarkerOptions> markers, MapsActivity mapsActivity, Context context) {
+    public static GPSServiceConnection getInstance(MapsActivityState mapsActivityState, GoogleMap map, MapsActivity mapsActivity, Context context) {
 
         if(instance == null) {
-            instance = new GPSServiceConnection(polylineOptions, map, markers, mapsActivity, context);
+            instance = new GPSServiceConnection(mapsActivityState, map, mapsActivity, context);
         }
         if (instance.getMap() == null ){
             instance.setMap(map);
         }
-        if (instance.getPolylineOptions() == null ){
-            instance.setPolylineOptions(polylineOptions);
-        }
-        if (instance.getMarkers() == null ){
-            instance.setMarkers(markers);
+        if (instance.getMapsActivityState() == null ){
+            instance.setMapsActivityState(mapsActivityState);
         }
         return instance;
 
     }
 
-    public GPSServiceConnection(PolylineOptions polylineOptions, GoogleMap map, List<MarkerOptions> markers, MapsActivity mapsActivity, Context context) {
-        this.setPolylineOptions(polylineOptions);
+    public GPSServiceConnection(MapsActivityState mapsActivityState, GoogleMap map, MapsActivity mapsActivity, Context context) {
+        this.setMapsActivityState(mapsActivityState);
         this.setMap(map);
-        this.setMarkers(markers);
         this.setActivity(mapsActivity);
         this.setLastContext(context);
     }
@@ -72,7 +68,7 @@ public class GPSServiceConnection implements ServiceConnection {
         // We've bound to LocalService, cast the IBinder and get LocalService instance
         setBinder((GPSbinder) service);
         setmService(getBinder().getService());
-        getmService().setParameters(getPolylineOptions(), getMap(), getMarkers(), this.getActivity());
+        getmService().setParameters(getMapsActivityState(), getMap(), this.getActivity());
         setmBound(true);
 
         Log.w(TAG, "Conexion con servicio GPS background establecida");
@@ -133,28 +129,12 @@ public class GPSServiceConnection implements ServiceConnection {
         this.mBound = mBound;
     }
 
-    public PolylineOptions getPolylineOptions() {
-        return polylineOptions;
-    }
-
-    public void setPolylineOptions(PolylineOptions polylineOptions) {
-        this.polylineOptions = polylineOptions;
-    }
-
     public GoogleMap getMap() {
         return map;
     }
 
     public void setMap(GoogleMap map) {
         this.map = map;
-    }
-
-    public List<MarkerOptions> getMarkers() {
-        return markers;
-    }
-
-    public void setMarkers(List<MarkerOptions> markers) {
-        this.markers = markers;
     }
 
     public Activity getActivity() {
@@ -179,5 +159,13 @@ public class GPSServiceConnection implements ServiceConnection {
         if(this.getmService() != null){
             this.getmService().updateMap(map);
         }
+    }
+
+    public MapsActivityState getMapsActivityState() {
+        return mapsActivityState;
+    }
+
+    public void setMapsActivityState(MapsActivityState mapsActivityState) {
+        this.mapsActivityState = mapsActivityState;
     }
 }

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPI;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPIObserver;
@@ -31,25 +32,22 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
     private static String TAG = "OrderTrackingServiceObs";
 
-    private OrderAdapter orderAdapter;
-    private List<MarkerOptions> markers;
     private GoogleMap map;
-    private PolylineOptions polylineOptions;
+    private MapsActivityState mapsActivityState;
     private GeofenceTransitionService geofenceTransitionService;
     private Business business;
 
-    public OrderTrackingServiceObserver(OrderAdapter orderAdapter, List<MarkerOptions> markers, GoogleMap map, PolylineOptions polylineOptions, GeofenceTransitionService geofenceTransitionService){
-        this.setOrderAdapter(orderAdapter);
-        this.setMarkers(markers);
+    public OrderTrackingServiceObserver(GoogleMap map, MapsActivityState mapsActivityState, GeofenceTransitionService geofenceTransitionService){
+
         this.setMap(map);
-        this.setPolylineOptions(polylineOptions);
+        this.setMapsActivityState(mapsActivityState);
         this.setGeofenceTransitionService(geofenceTransitionService);
     }
 
     @Override
     public void update() {
 
-        List<Order> adapterOrders = this.getOrderAdapter().getOrders();
+        List<Order> adapterOrders = this.getMapsActivityState().getOrderAdapter().getOrders();
         Boolean notificar = false;
         Integer posicion = -1;
 
@@ -66,7 +64,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             .snippet("Descipcion del negocio")
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.pizza_business))
                             .alpha(0.7f);
-                    this.getMarkers().add(markerOptions);
+                    this.getMapsActivityState().getMarkers().add(markerOptions);
                     Log.w(TAG, "Se agregó el marcador del negocio: " + this.getBusiness().toString() );
 
                 }else{
@@ -89,7 +87,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             adapterOrders.remove(order);
                             Log.w(TAG, "Se removió la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
                             // this.getOrderAdapter().remove(order);
-                            this.getMarkers().remove(orderIndex);
+                            this.getMapsActivityState().getMarkers().remove(orderIndex);
                             Log.w(TAG, "Se removió el marcador de la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
 
                             // TODO > remover GEOFENCE de la orden eliminada.
@@ -101,7 +99,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                         if (!esUnEstadoFinal) {
                             adapterOrders.add(posicion, order);
                             Log.w(TAG, "Se agregó la orden: " + order.toString() + " | " + " En la posicion: " + posicion );
-                            this.getOrderAdapter().notifyDataSetChanged();
+                            this.getMapsActivityState().getOrderAdapter().notifyDataSetChanged();
 
                             LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
                             MarkerOptions markerOptions = new MarkerOptions().position(position)
@@ -109,7 +107,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                                     .snippet("Descipcion de la orden")
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination))
                                     .alpha(0.7f);
-                            this.getMarkers().add(markerOptions);
+                            this.getMapsActivityState().getMarkers().add(markerOptions);
                             Log.w(TAG, "Se agregó el marcador de la orden: " + order.toString() + " | " + " En la posicion: " + orderIndex);
 
                             this.getGeofenceTransitionService().addGeofence(order.getAddress(), position);
@@ -125,14 +123,16 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
         }catch(Exception e){
             Log.e(TAG, "No se pudieron recuperar las ordenes: " + e.toString());
-            MessageHelper.toast(getOrderAdapter().getContext(), "No se pudieron recuperar las ordenes: " + e.toString(),  Toast.LENGTH_LONG);
+            MessageHelper.toast(getMapsActivityState().getOrderAdapter().getContext(), "No se pudieron recuperar las ordenes: " + e.toString(),  Toast.LENGTH_LONG);
         }
 
         if (notificar){
             // limpiar el mapa, cargar los markers destinos , sin perder el polyline!!!!
             map.clear();
-            map.addPolyline(this.getPolylineOptions());
-            for (MarkerOptions markerOptions: this.getMarkers()) {
+            map.addPolyline(this.getMapsActivityState().getRepartidorPolyline());
+//            map.notify();
+//            this.getPolylineOptions().notify();
+            for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {
                 Marker marker = this.getMap().addMarker(markerOptions);
                 marker.setTag("");
             }
@@ -141,30 +141,14 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
             this.getGeofenceTransitionService().startGeofencingMonitoring();
 
             // se arma el recorrido
-            GoogleDirectionsAPIObserver googleDirectionsAPIObserver = new GoogleDirectionsAPIObserver(map);
-            GoogleDirectionsAPI googleDirectionsAPI = new GoogleDirectionsAPI(this.getOrderAdapter().getContext(), googleDirectionsAPIObserver);
-            googleDirectionsAPI.route(this.getBusiness(), this.getOrderAdapter());
+            GoogleDirectionsAPIObserver googleDirectionsAPIObserver = new GoogleDirectionsAPIObserver(map, this.getMapsActivityState());
+            GoogleDirectionsAPI googleDirectionsAPI = new GoogleDirectionsAPI(this.getMapsActivityState().getOrderAdapter().getContext(), googleDirectionsAPIObserver);
+            googleDirectionsAPI.route(this.getBusiness(), this.getMapsActivityState().getOrderAdapter());
 
             Log.i(TAG, "Recorrido del repartidor actualizado");
             MessageHelper.showOnlyAlert(this.getGeofenceTransitionService().getActivity(), "Atencion!", "Se actualizó la lista de ordenes, por lo tanto el recorrido sugerido tambien será actualizado." );
         }
 
-    }
-
-    public OrderAdapter getOrderAdapter() {
-        return orderAdapter;
-    }
-
-    public void setOrderAdapter(OrderAdapter orderAdapter) {
-        this.orderAdapter = orderAdapter;
-    }
-
-    public List<MarkerOptions> getMarkers() {
-        return markers;
-    }
-
-    public void setMarkers(List<MarkerOptions> markers) {
-        this.markers = markers;
     }
 
     public GoogleMap getMap() {
@@ -173,14 +157,6 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
     public void setMap(GoogleMap map) {
         this.map = map;
-    }
-
-    public PolylineOptions getPolylineOptions() {
-        return polylineOptions;
-    }
-
-    public void setPolylineOptions(PolylineOptions polylineOptions) {
-        this.polylineOptions = polylineOptions;
     }
 
     public GeofenceTransitionService getGeofenceTransitionService() {
@@ -197,5 +173,14 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
     public void setBusiness(Business business) {
         this.business = business;
+    }
+
+
+    public MapsActivityState getMapsActivityState() {
+        return mapsActivityState;
+    }
+
+    public void setMapsActivityState(MapsActivityState mapsActivityState) {
+        this.mapsActivityState = mapsActivityState;
     }
 }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,20 +27,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.maps.DirectionsApi;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.GeoApiContext;
-import com.google.maps.model.DirectionsResult;
-import com.google.maps.model.DirectionsRoute;
-import com.google.maps.model.TravelMode;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -50,8 +39,6 @@ import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsA
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSServiceConnection;
 import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSservice;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
 
@@ -65,8 +52,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GPSservice mService;
     private boolean mBound = false;
-
-    private PolylineOptions polylineOptions;
 
     private GoogleMap map = null;
 
@@ -119,9 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void initializeAndConfigureOrderAdapter() {
 
-        // listView de ordenes
-//        getMapsActivityState().setAdapter(new OrderAdapter(this, new LinkedList<Order>()));
-
         // configurar vista de lista vacia
         TextView list_message_text_view = findViewById(R.id.list_menssage);
         list_message_text_view.setText("No tienes una entrega activa");
@@ -130,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // configurar lista con adaptador y con vista
         ListView listView = findViewById(R.id.mobile_list);
         listView.setEmptyView(list_message_text_view);
-        listView.setAdapter(getMapsActivityState().getAdapter());
+        listView.setAdapter(getMapsActivityState().getOrderAdapter());
 
     }
 
@@ -167,16 +149,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setMap(googleMap);
 
         // Bind to LocalService
-        setmConnection(GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMapsActivityState().getMarkers(), MapsActivity.this, MapsActivity.this));
+        setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMap(), MapsActivity.this, MapsActivity.this));
         if(getmConnection().ismBound()){
             getmConnection().updateMap(this.getMap());
-            this.setPolylineOptions(getmConnection().getPolylineOptions());
-//            getMapsActivityState().setMarkers(getmConnection().getMarkers());
             this.setmService(getmConnection().getmService());
             Log.w(TAG, "Conexion con Google Play Services Location API reestablecida!");
         }
 
-        if (getPolylineOptions() == null) {
+        if (getMapsActivityState().getRepartidorPolyline() == null) {
 
             LatLng initialPosition = new LatLng(-34.9212,-57.95562);
             boolean ACCESS_FINE_OK = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -199,18 +179,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
             // TODO > Ver cual de las dos incializaciones de polyline tienen sentido
-            setPolylineOptions(new PolylineOptions().geodesic(true).visible(true).width(15).color(Color.rgb(244, 67, 54)));
+            PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
+            getMapsActivityState().setRepartidorPolyline( newRepartidorPolyline );
 
         }else{
-            getMap().addPolyline(getPolylineOptions());
+            // restauro polilyne del recorrido del repatidor
+            getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
         }
 
+        // restauro marcadores
         if(!this.getMapsActivityState().getMarkers().isEmpty()){
             for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {
                 Marker marker = this.getMap().addMarker(markerOptions);
                 marker.setTag("");
             }
         }
+
+        // restauro polyline de la entrega
+        if( getMapsActivityState().getEntregaPolyline() != null){
+            getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
+        }
+
         getMap().getUiSettings().setZoomControlsEnabled(true);
         getMap().setMyLocationEnabled(true);
         getMap().setOnMarkerClickListener(this);
@@ -306,7 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (button.getText().equals(getResources().getString(R.string.pause))) {
 
-           if( getMapsActivityState().getAdapter().isEmpty() ){
+           if( getMapsActivityState().getOrderAdapter().isEmpty() ){
                 // detengo el servicio background de actualizacion de posiciones gps
                 // TODO > ver que onda este medoto !
                 this.getmConnection().stopGPSUpdates();
@@ -322,7 +311,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
 
             try{
-                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(3, getMapsActivityState().getAdapter(), getMapsActivityState().getMarkers(), this.getMap(), this.getPolylineOptions());
+                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(3, this.getMap(), getMapsActivityState());
             }catch (Exception e){
                 Log.e(TAG, "No se pudo recuperar una entrega activa");
                 MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
@@ -331,11 +320,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             this.obtenerEntregaActivaCadaUnMinuto();
 
             // limpiar pililyne
-            setPolylineOptions(new PolylineOptions().geodesic(true).visible(true).width(15).color(Color.rgb(244, 67, 54)));
-            getMap().addPolyline(getPolylineOptions());
+            PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
+            getMapsActivityState().setRepartidorPolyline( newRepartidorPolyline );
+
+            getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
 
             // Bind to LocalService
-            setmConnection(GPSServiceConnection.getInstance(getPolylineOptions(), getMap(), getMapsActivityState().getMarkers(), MapsActivity.this, MapsActivity.this));
+            setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMap(), this, this.getApplicationContext()));
             if(!getmConnection().ismBound()){
                 Intent intent = new Intent(this, GPSservice.class);
                 bindService(intent, getmConnection(), Context.BIND_AUTO_CREATE);
@@ -356,7 +347,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run() {
                         try {
                             //Ejecuta tu AsyncTask!
-                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(3, getMapsActivityState().getAdapter(), getMapsActivityState().getMarkers(), getMap(), getPolylineOptions());
+                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(3, getMap(), getMapsActivityState());
                         } catch (Exception e) {
                             Log.e(TAG, "No se pudo recuperar una entrega activa cada 1 minuto" + e.getMessage());
                             MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa cada 1 minuto", Toast.LENGTH_SHORT);
@@ -441,7 +432,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelable("polylineOptions", getPolylineOptions());
+//        outState.putParcelable("polylineOptions", getPolylineOptions());
 
         Button button = findViewById(R.id.deliver_button);
         outState.putCharSequence("buttonState", button.getText());
@@ -455,7 +446,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
 
-        setPolylineOptions((PolylineOptions) savedInstanceState.getParcelable("polylineOptions"));
+//        setPolylineOptions((PolylineOptions) savedInstanceState.getParcelable("polylineOptions"));
 
         Button button = findViewById(R.id.deliver_button);
         button.setText(savedInstanceState.getCharSequence("buttonState"));
@@ -498,28 +489,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.mFusedLocationClient = mFusedLocationClient;
     }
 
-//    public List<MarkerOptions> getMarkers() {
-//        return markers;
-//    }
-//
-//    public void setMarkers(List<MarkerOptions> markers) {
-//        this.markers = markers;
-//    }
-
     public GoogleMap getMap() {
         return map;
     }
 
     public void setMap(GoogleMap map) {
         this.map = map;
-    }
-
-    public PolylineOptions getPolylineOptions() {
-        return polylineOptions;
-    }
-
-    public void setPolylineOptions(PolylineOptions polylineOptions) {
-        this.polylineOptions = polylineOptions;
     }
 
     public GPSservice getmService() {
