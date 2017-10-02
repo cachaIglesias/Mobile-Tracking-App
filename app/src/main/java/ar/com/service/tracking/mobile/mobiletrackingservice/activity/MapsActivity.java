@@ -89,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String explanationMessage = "Debe aceptar los permisos solicitados para un correcto funcionamiento de la aplicación";
         permissionHelper.verificarSiExistePermisoYSolicitarSiEsNecesario(this, permission, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST, title, explanationMessage);
 
-        this.setMapsActivityState(MapsActivityState.getInstance(this.getApplicationContext()));
+        this.setMapsActivityState(MapsActivityState.getInstance(this));
 
         this.initializeAndConfigureOrderAdapter();
 

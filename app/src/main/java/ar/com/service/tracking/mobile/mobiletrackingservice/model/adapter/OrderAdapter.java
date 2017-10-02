@@ -88,7 +88,7 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         TextView productoView = (TextView) convertView.findViewById(R.id.producto);
         TextView precioView = (TextView) convertView.findViewById(R.id.precio);
         // Populate the data into the template view using the data object
-        destinoView.setText(order.getDireccion());
+        destinoView.setText(order.getAddress());
         destinatarioView.setText( order.getDestinatario());
         productoView.setText(order.getProducto());
         if(order.getValor() != null){
