@@ -81,7 +81,7 @@ public class TrackingServiceConnector {
 //        setSharedPref( getSharedPreferences("SettingFile", MODE_PRIVATE));
 //                Long segundos = Long.valueOf(getSharedPref().getString("minTime", "3").split(" ")[0]);
 //        Float metros = Float.valueOf(getSharedPref().getString("minDist", "10").split(" ")[0]);
-        // TODO : agregar los parametros distancia y tiempo de referzco del geofence a los datos que se deben tener en cuenta en la actividad de configuracion.
+        // TODO > Geofence radio y distancia estan hardcodeados, se deberian obtener de la configuracion.
         GeofenceTransitionService geofenceTransitionService = GeofenceTransitionService.getInstance(this.getLastActivity(), 150, 3);
         OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(map, mapsActivityState, geofenceTransitionService);
         ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);

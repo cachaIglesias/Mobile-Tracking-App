@@ -100,8 +100,8 @@ public class ResponseObject implements Callback<JSONApiObject>{
     @Override
     public void onFailure(Call<JSONApiObject> call, Throwable t) {
         // handle failure
-        Log.e(TAG, "Falla en la conexción con el servicio de posicionamiento. Error: " + t.toString() + " | " + t.getMessage());
-        Toast.makeText(getContext(), "Falla en la conexción con el servicio de posicionamiento. Error: " + t.toString(), Toast.LENGTH_SHORT).show();
+        Log.e(TAG, "Falla en la conexción con el servicio de posicionamiento.  No se pudo recuperar una entrega activa. Error: " + t.toString() + " | " + t.getMessage());
+        Toast.makeText(getContext(), "No se pudo recuperar una entrega activa. En 1 minuto el sistema reintentará la operación", Toast.LENGTH_LONG).show();
     }
 
     private void notifyObserver() {

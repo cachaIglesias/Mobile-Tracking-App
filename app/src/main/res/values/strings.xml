@@ -11,4 +11,5 @@
     <integer name="mapZoom">10</integer>
     <integer name="minTimePositionRefresh">200</integer>
     <integer name="minDistancePositionRefresh">10</integer>
+    <!-- TODO > pasar strings aca ! -->
 </resources>

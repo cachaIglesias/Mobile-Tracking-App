@@ -57,8 +57,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private PermissionHelper permissionHelper = new PermissionHelper();
 
-//    private OrderAdapter adapter;
-
     private final Handler handler = new Handler();
 
     public static Timer timer;
@@ -66,8 +64,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SharedPreferences sharedPref;
 
     private FusedLocationProviderClient mFusedLocationClient;
-
-//    private List<MarkerOptions> markers = new LinkedList<MarkerOptions>();
 
     private GPSServiceConnection mConnection;
 
@@ -178,7 +174,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
-            // TODO > Ver cual de las dos incializaciones de polyline tienen sentido
+
+            // Inicializa el polyline la primera vez
             PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
             getMapsActivityState().setRepartidorPolyline( newRepartidorPolyline );
 
@@ -220,12 +217,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
     }
 
-    //    private boolean isLocationEnabled() {
-//
-//        // TODO : network provider no se puede probar en el emulador, revisar si se puede debaguear conectando el celular.
-//        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); //|| locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-//    }
-
     /**
      * @method Verifica si la localizacion GPS y por RED este activa y envia un mensaje de alerta en caso de no estarlo
      */
@@ -259,6 +250,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //    }
 
+    /** TODO >
+     * esto deberia hacerse como el boton de retroceso provisto por android.
+     * Los valores guardarlos en SharedPreferences, en la key="SettingFile".
+     * Los mismo deberian levantarse en el oncreate y estar disponible para todos. */
     /**
      * @method  Dispara la actividad de configuracion
      *
@@ -267,7 +262,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void settingsActivity(View view){
 
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
-// TODO > esto deberia hacerse como estaba antes y los valores guardarlos en alguna base de datos. los mismo deberian levantarse en el oncreate y estar disponible para todos.
+
 //        int requestCode = 123;
 //      startActivityForResult(settingsIntent, requestCode);
         startActivity(settingsIntent);
@@ -319,7 +314,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             this.obtenerEntregaActivaCadaUnMinuto();
 
-            // limpiar pililyne
+            // Crea un nuevo polyline por cada recorrido de una entrega activa
             PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
             getMapsActivityState().setRepartidorPolyline( newRepartidorPolyline );
 
@@ -350,7 +345,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(3, getMap(), getMapsActivityState());
                         } catch (Exception e) {
                             Log.e(TAG, "No se pudo recuperar una entrega activa cada 1 minuto" + e.getMessage());
-                            MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa cada 1 minuto", Toast.LENGTH_SHORT);
+                            MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa, en 1 minuto se volverá a intentar", Toast.LENGTH_LONG);
                         }
                     }
                 });
@@ -371,7 +366,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void cancelarObtencionDeEntregaActivaCadaUnMinuto() {
 
         this.getTimer().cancel();
-        Log.w(TAG, "Entrega activa cada 1 minuto cancelada");
+        Log.w(TAG, "Consulta de entrega activa cada 1 minuto cancelada");
 
     }
 
@@ -432,8 +427,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-//        outState.putParcelable("polylineOptions", getPolylineOptions());
-
         Button button = findViewById(R.id.deliver_button);
         outState.putCharSequence("buttonState", button.getText());
 
@@ -446,20 +439,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
 
-//        setPolylineOptions((PolylineOptions) savedInstanceState.getParcelable("polylineOptions"));
-
         Button button = findViewById(R.id.deliver_button);
         button.setText(savedInstanceState.getCharSequence("buttonState"));
 
     }
-
-//    public OrderAdapter getAdapter() {
-//        return adapter;
-//    }
-//
-//    public void setAdapter(OrderAdapter adapter) {
-//        this.adapter = adapter;
-//    }
 
     public Handler getHandler() {
         return handler;
@@ -521,7 +504,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void setmConnection(GPSServiceConnection mConnection) {
         this.mConnection = mConnection;
     }
-
 
     public MapsActivityState getMapsActivityState() {
         return mapsActivityState;
