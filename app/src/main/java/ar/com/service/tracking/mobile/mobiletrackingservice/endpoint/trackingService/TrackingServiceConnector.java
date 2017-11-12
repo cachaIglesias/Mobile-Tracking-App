@@ -1,22 +1,20 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
+package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.gustavofao.jsonapi.Models.JSONApiObject;
-import com.gustavofao.jsonapi.Models.JSONList;
 
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.geofence.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.OrderTrackingServiceObserver;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.ResponseObject;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Trace;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 import retrofit2.Call;
 
 /**

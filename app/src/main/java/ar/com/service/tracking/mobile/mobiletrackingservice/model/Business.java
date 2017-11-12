@@ -11,11 +11,11 @@ public class Business extends Resource {
 
     private String name;
     private String address;
-    private Position position = new Position(-34.914261, -57.961304);
+    //    private Position position = new Position(-34.914261, -57.961304);
+    private Position position;
 
     public Business(){
     }
-
 
     public String getName() {
         return name;
@@ -40,4 +40,5 @@ public class Business extends Resource {
     public void setPosition(Position position) {
         this.position = position;
     }
+
 }

@@ -5,10 +5,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.gustavofao.jsonapi.Models.Resource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.util.Log;
@@ -16,12 +13,11 @@ import android.widget.Toast;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GeofenceTransitionService;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPI;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GoogleDirectionsAPIObserver;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.geofence.GeofenceTransitionService;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.directions.GoogleDirectionsAPI;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.directions.GoogleDirectionsAPIObserver;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
-import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**
@@ -55,13 +51,14 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
             for (int i = 0 ; i <= this.getResponseObjectList().size() - 1; i++){
                 if(i == 0){
+                    // TODO > CREO QUE ACA DEBERIA ENTRAR SOLO UNA VEZ Y NO POR CADA ACTUALIZACION DEL OBSERVER.
 
                     this.setBusiness((Business) this.getResponseObjectList().get(i));
 
                     LatLng position = new LatLng(this.getBusiness().getPosition().getLatitude(), this.getBusiness().getPosition().getLongitude());
                     MarkerOptions markerOptions = new MarkerOptions().position(position)
                             .title(this.getBusiness().getAddress())
-                            .snippet("Descipcion del negocio")
+                            .snippet(this.getBusiness().getName())
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.pizza_business))
                             .alpha(0.7f);
                     this.getMapsActivityState().getMarkers().add(markerOptions);
@@ -104,7 +101,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
                             MarkerOptions markerOptions = new MarkerOptions().position(position)
                                     .title(order.getAddress())
-                                    .snippet("Descipcion de la orden")
+                                    .snippet(order.getProducto() + " valor: " + order.getValor() + " cliente: " + order.getDestinatario() )
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination))
                                     .alpha(0.7f);
                             this.getMapsActivityState().getMarkers().add(markerOptions);
@@ -128,8 +125,8 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
         if (notificar){
             // limpiar el mapa, cargar los markers destinos , sin perder el polyline!!!!
-            map.clear();
-            map.addPolyline(this.getMapsActivityState().getRepartidorPolyline());
+            this.getMap().clear();
+            this.getMap().addPolyline(this.getMapsActivityState().getRepartidorPolyline());
 //            map.notify();
 //            this.getPolylineOptions().notify();
             for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {

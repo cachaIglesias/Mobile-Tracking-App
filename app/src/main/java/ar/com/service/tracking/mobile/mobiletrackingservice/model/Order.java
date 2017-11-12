@@ -5,6 +5,7 @@ import com.gustavofao.jsonapi.Annotations.Type;
 import com.gustavofao.jsonapi.Models.Resource;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by miglesias on 08/07/17.
@@ -30,6 +31,8 @@ public class Order extends Resource {
     private Business business;
     private Position position;
     private Delivery delivery;
+
+    private List<OrderProduct> ordered_products;
 
     public Order(){}
 
@@ -131,6 +134,22 @@ public class Order extends Resource {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<OrderProduct> getOrdered_products() {
+        return ordered_products;
+    }
+
+    public void setOrdered_products(List<OrderProduct> ordered_products) {
+        this.ordered_products = ordered_products;
+    }
+
+    public String printOrdered_products(){
+        String ordered_products = " ";
+        for ( OrderProduct order_product : this.getOrdered_products() ) {
+            ordered_products += order_product.getProduct().getName() + ", ";
+        }
+        return ordered_products;
     }
 
 //    // Constructor to convert JSON object into a Java class instance

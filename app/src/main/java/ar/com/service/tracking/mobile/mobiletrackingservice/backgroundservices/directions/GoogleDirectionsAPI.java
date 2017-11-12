@@ -1,24 +1,8 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.directions;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 
@@ -26,18 +10,14 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
-import com.google.maps.model.TrafficModel;
 import com.google.maps.model.TravelMode;
-import com.google.maps.model.Unit;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
-import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**
  * Created by miglesias on 28/09/17.
@@ -50,6 +30,8 @@ public class GoogleDirectionsAPI {
     private Context context;
     List<LatLng> waypoints = new LinkedList<LatLng>();
     GoogleDirectionsAPIObserver observer;
+
+ //   private ProgressDialog progressDialog;
 
     public GoogleDirectionsAPI(Context appContext, GoogleDirectionsAPIObserver googleDirectionsAPIObserver){
 
@@ -92,11 +74,19 @@ public class GoogleDirectionsAPI {
 
 //                apiRequest.awaitIgnoreError();
 
+       // progressDialog= new ProgressDialog(this.context);
+
+        //agregas un mensaje en el ProgressDialog
+        //progressDialog.setMessage("Cargando recorrido de la entrega.");
+        //muestras el ProgressDialog
+        //progressDialog.show();
+
         apiRequest.setCallback(new com.google.maps.PendingResult.Callback<DirectionsResult>() {
             @Override
             public void onResult(DirectionsResult result) {
                 //   MessageHelper.toast(context, "Ruteo Exitoso", Toast.LENGTH_SHORT);
-                Log.i(TAG, "Ruteo Exitoso");
+
+                //progressDialog.dismiss();
 
                 DirectionsRoute[] routes = result.routes;
                 final List<com.google.android.gms.maps.model.LatLng> route = new LinkedList<com.google.android.gms.maps.model.LatLng>();
@@ -113,6 +103,7 @@ public class GoogleDirectionsAPI {
                 }
                 observer.notify(route);
 
+                Log.i(TAG, "Ruteo Exitoso");
             }
 
             @Override

@@ -36,9 +36,9 @@ import java.util.TimerTask;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSServiceConnection;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSservice;
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.GPSServiceConnection;
+import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.GPSservice;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.PermissionHelper;
 

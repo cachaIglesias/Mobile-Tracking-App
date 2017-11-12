@@ -54,17 +54,17 @@
         </activity>
 
         <service
-            android:name=".backgroundservice.GPSservice"
+            android:name=".backgroundservices.GPSservice"
             android:enabled="true"
             android:exported="false"/>
 
-        <service android:name=".backgroundservice.GeofenceTransitionsIntentService"
+        <service android:name=".backgroundservices.geofence.GeofenceTransitionsIntentService"
             android:enabled="true"
             android:exported="false"/>
 
         <activity android:name=".activity.SettingsActivity"></activity>
 
-        <receiver android:name=".backgroundservice.ActivityFenceReceiver" >
+        <receiver android:name=".backgroundservices.activityFence.ActivityFenceReceiver" >
             <intent-filter>
                 <action android:name="ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.FENCE_RECEIVER_ACTION" />
             </intent-filter>

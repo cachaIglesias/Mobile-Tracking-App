@@ -10,13 +10,11 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
-import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
+import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
@@ -44,14 +42,14 @@ public class OrderAdapter extends ArrayAdapter<Order> {
 
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
 
                 MessageHelper.toast(getContext(), "seleccione la orden numero: " + position, Toast.LENGTH_SHORT);
 
                 final TrackingServiceConnector instancia = TrackingServiceConnector.getInstance(getContext(), null);
 
                 String title = "Llegaste a destino !?";
-                String message = "Pudiste entregar la orden de " + order.getProducto() + "a " + order.getDestinatario();
+                String message = "Pudiste entregar la orden de " + order.printOrdered_products() + "a " + order.getDestinatario();
 
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
 
@@ -62,6 +60,8 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                             public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                                 instancia.marcarComoFinalizado(Integer.parseInt(order.getId()));
                                 MessageHelper.toast(getContext(), "Orden finalizada", Toast.LENGTH_SHORT);
+                                view.setBackgroundColor(0x7F00FF00);
+                                view.setEnabled(false);
                             }
                         })
                         .setNegativeButton("No, cancelar orden", new DialogInterface.OnClickListener() {
@@ -69,6 +69,8 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                             public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                                 instancia.marcarComoCancelado(Integer.parseInt(order.getId()));
                                 MessageHelper.toast(getContext(), "Orden canncelada", Toast.LENGTH_SHORT);
+                                view.setBackgroundColor(0x7FFF0000);
+                                view.setEnabled(false);
                             }
                         }).setNeutralButton("Regresar al mapa", new DialogInterface.OnClickListener(){
                             @Override
@@ -90,7 +92,7 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         // Populate the data into the template view using the data object
         destinoView.setText(order.getAddress());
         destinatarioView.setText( order.getDestinatario());
-        productoView.setText(order.getProducto());
+        productoView.setText(order.printOrdered_products());
         if(order.getValor() != null){
             precioView.setText(order.getValor().toString());
         }

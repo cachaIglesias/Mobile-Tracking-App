@@ -1,9 +1,8 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.geofence;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**

@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.activityFence;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

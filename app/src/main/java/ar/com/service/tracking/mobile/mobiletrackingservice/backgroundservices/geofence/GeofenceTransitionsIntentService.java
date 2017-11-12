@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.geofence;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -20,7 +20,6 @@ import com.google.android.gms.location.GeofencingEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
@@ -34,7 +33,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     public GeofenceTransitionsIntentService(){
         super(TAG);
-
     }
 
     @Override

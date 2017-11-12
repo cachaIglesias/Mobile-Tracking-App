@@ -1,25 +1,16 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices;
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
-import com.google.android.gms.common.internal.safeparcel.zzd;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.io.Serializable;
-import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
-import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.TrackingServiceConnector;
 
 /**
  * Created by miglesias on 07/09/17.

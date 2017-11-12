@@ -1,11 +1,14 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint;
+package ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService;
 
 import com.gustavofao.jsonapi.Models.JSONApiObject;
 import com.gustavofao.jsonapi.Retrofit.JSONConverterFactory;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Delivery;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.DeliveryMan;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.OrderProduct;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Product;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Trace;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Position;
@@ -22,11 +25,11 @@ import retrofit2.http.Path;
 
 public interface TrackingService {
 
-    Class[] classes = { Business.class, Delivery.class, DeliveryMan.class, Order.class, Position.class, Trace.class };
+    Class[] classes = { Business.class, Delivery.class, DeliveryMan.class, Order.class, Position.class, Trace.class, Product.class, OrderProduct.class};
 
     // mascara que identifica a LocalHost en Android > "http://10.0.2.2:3000/"
     public static final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000")
+            .baseUrl("http://10.0.2.2:3000/")
             .addConverterFactory(JSONConverterFactory.create(classes))
             .build();
 

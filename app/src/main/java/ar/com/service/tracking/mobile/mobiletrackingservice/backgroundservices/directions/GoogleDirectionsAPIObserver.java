@@ -1,4 +1,4 @@
-package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice;
+package ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservices.directions;
 
 import android.os.Handler;
 import android.util.Log;
@@ -43,6 +43,7 @@ public class GoogleDirectionsAPIObserver {
                 polyOptions.addAll(route);
                 getMapsActivityState().setEntregaPolyline( polyOptions );
                 Polyline polyline = getMap().addPolyline(polyOptions);
+                // TODO > que es esta latlang ? sera la del local de repartos ?
                 polyline.getPoints().add(new LatLng(-34.934428, -57.963613));
 
                 Log.w(TAG, "Recorrido establecido");

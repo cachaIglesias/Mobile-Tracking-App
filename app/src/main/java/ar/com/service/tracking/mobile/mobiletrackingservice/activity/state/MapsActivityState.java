@@ -2,17 +2,12 @@ package ar.com.service.tracking.mobile.mobiletrackingservice.activity.state;
 
 import android.content.Context;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
-import ar.com.service.tracking.mobile.mobiletrackingservice.backgroundservice.GPSServiceConnection;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 
@@ -44,7 +39,7 @@ public class MapsActivityState {
     }
 
     public MapsActivityState(Context context){
-        this.orderAdapter = new OrderAdapter(context, new LinkedList<Order>());
+        this.setOrderAdapter(new OrderAdapter(context, new LinkedList<Order>()));
     }
 
 
