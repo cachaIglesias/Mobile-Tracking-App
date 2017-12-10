@@ -26,8 +26,8 @@ public class GoogleDirectionsAPIObserver {
 
     private Handler handler = new Handler();
 
-    public GoogleDirectionsAPIObserver(GoogleMap map, MapsActivityState mapsActivityState){
-        this.setMap(map);
+    public GoogleDirectionsAPIObserver(MapsActivityState mapsActivityState){
+//        this.setMap(map);
         this.setMapsActivityState(mapsActivityState);
     }
 
@@ -42,9 +42,10 @@ public class GoogleDirectionsAPIObserver {
                 polyOptions.width(15);
                 polyOptions.addAll(route);
                 getMapsActivityState().setEntregaPolyline( polyOptions );
-                Polyline polyline = getMap().addPolyline(polyOptions);
+                getMapsActivityState().refreshMap();
+//                getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
                 // TODO > que es esta latlang ? sera la del local de repartos ?
-                polyline.getPoints().add(new LatLng(-34.934428, -57.963613));
+                //polyline.getPoints().add(new LatLng(-34.934428, -57.963613));
 
                 Log.w(TAG, "Recorrido establecido");
             }
@@ -65,13 +66,13 @@ public class GoogleDirectionsAPIObserver {
     }
 
 
-    public GoogleMap getMap() {
-        return map;
-    }
-
-    public void setMap(GoogleMap map) {
-        this.map = map;
-    }
+//    public GoogleMap getMap() {
+//        return map;
+//    }
+//
+//    public void setMap(GoogleMap map) {
+//        this.map = map;
+//    }
 
     public MapsActivityState getMapsActivityState() {
         return mapsActivityState;

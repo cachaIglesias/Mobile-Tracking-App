@@ -142,12 +142,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        setMap(googleMap);
+        this.setMap(googleMap);
 
         // Bind to LocalService
-        setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMap(), MapsActivity.this, MapsActivity.this));
+        setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMapsActivityState().getMap(), MapsActivity.this, MapsActivity.this));
         if(getmConnection().ismBound()){
-            getmConnection().updateMap(this.getMap());
+//            getmConnection().updateMap(this.getMap());
             this.setmService(getmConnection().getmService());
             Log.w(TAG, "Conexion con Google Play Services Location API reestablecida!");
         }
@@ -165,7 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             LatLng initialPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
+                            getMapsActivityState().getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
                             Log.i(TAG, "Se logró obtener la ultima posición conocida");
                         }
                     }
@@ -173,7 +173,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
 
-            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
+            getMapsActivityState().getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(initialPosition, 13));
 
             // Inicializa el polyline la primera vez
             PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
@@ -181,25 +181,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }else{
             // restauro polilyne del recorrido del repatidor
-            getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
+            getMapsActivityState().getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
         }
 
         // restauro marcadores
         if(!this.getMapsActivityState().getMarkers().isEmpty()){
             for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {
-                Marker marker = this.getMap().addMarker(markerOptions);
+                Marker marker = this.getMapsActivityState().getMap().addMarker(markerOptions);
                 marker.setTag("");
             }
         }
 
         // restauro polyline de la entrega
         if( getMapsActivityState().getEntregaPolyline() != null){
-            getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
+            getMapsActivityState().getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
         }
 
-        getMap().getUiSettings().setZoomControlsEnabled(true);
-        getMap().setMyLocationEnabled(true);
-        getMap().setOnMarkerClickListener(this);
+        getMapsActivityState().getMap().getUiSettings().setZoomControlsEnabled(true);
+        getMapsActivityState().getMap().setMyLocationEnabled(true);
+        getMapsActivityState().getMap().setOnMarkerClickListener(this);
 
         Log.i(TAG, "Mapa creado y configurado");
     }
@@ -290,12 +290,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (button.getText().equals(getResources().getString(R.string.pause))) {
 
-           if( getMapsActivityState().getOrderAdapter().isEmpty() ){
+           if( !getMapsActivityState().getOrderAdapter().hasSendedOrders() ){
                 // detengo el servicio background de actualizacion de posiciones gps
                 // TODO > ver que onda este medoto !
                 this.getmConnection().stopGPSUpdates();
                 // detengo la solucitud de entregas activas cada 1 minuto
                 this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
+
+               getMapsActivityState().resetMapsActivityState();
 
                 button.setText(R.string.deliver);
            }else{
@@ -306,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
 
             try{
-                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), this.getMap(), getMapsActivityState());
+                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), getMapsActivityState());
             }catch (Exception e){
                 Log.e(TAG, "No se pudo recuperar una entrega activa");
                 MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
@@ -317,11 +319,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // Crea un nuevo polyline por cada recorrido de una entrega activa
             PolylineOptions newRepartidorPolyline = new PolylineOptions().geodesic(true).visible(true).width(15).color(0x7FFF0000);
             getMapsActivityState().setRepartidorPolyline( newRepartidorPolyline );
-
-            getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
+            getMapsActivityState().refreshRepartidorPolyline();
 
             // Bind to LocalService
-            setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMap(), this, this.getApplicationContext()));
+            setmConnection(GPSServiceConnection.getInstance(getMapsActivityState(), getMapsActivityState().getMap(), this, this.getApplicationContext()));
             if(!getmConnection().ismBound()){
                 Intent intent = new Intent(this, GPSservice.class);
                 bindService(intent, getmConnection(), Context.BIND_AUTO_CREATE);
@@ -342,7 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run() {
                         try {
                             //Ejecuta tu AsyncTask!
-                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), getMap(), getMapsActivityState());
+                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), getMapsActivityState());
                         } catch (Exception e) {
                             Log.e(TAG, "No se pudo recuperar una entrega activa cada 1 minuto" + e.getMessage());
                             MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa, en 1 minuto se volverá a intentar", Toast.LENGTH_LONG);
@@ -472,12 +473,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.mFusedLocationClient = mFusedLocationClient;
     }
 
-    public GoogleMap getMap() {
-        return map;
-    }
+//    public GoogleMap getMap() {
+//        return map;
+//    }
 
     public void setMap(GoogleMap map) {
         this.map = map;
+        this.getMapsActivityState().setMap(map);
     }
 
     public GPSservice getmService() {

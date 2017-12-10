@@ -77,7 +77,7 @@ public class GPSservice extends Service {
     public void setParameters(MapsActivityState mapsActivityState, GoogleMap activiyMapMap, Activity activity) {
 
         this.setMapsActivityState(mapsActivityState);
-        this.setMap(activiyMapMap);
+//        this.setMap(activiyMapMap);
         this.setActivity(activity);
 
         sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
@@ -141,15 +141,15 @@ public class GPSservice extends Service {
 
                     // String zoom = getSharedPref().getString("centerZoom", "1").split(" ")[0];
 
-                    getMap().clear();
-                    getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
+                    getMapsActivityState().getMap().clear();
+                    getMapsActivityState().getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(centrar, 17));
 
                     getMapsActivityState().getRepartidorPolyline().add(new LatLng(latitudeGPS, longitudeGPS));
 
-                    getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
+                    getMapsActivityState().getMap().addPolyline(getMapsActivityState().getRepartidorPolyline());
 
                     if (getMapsActivityState().getEntregaPolyline() != null){
-                        getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
+                        getMapsActivityState().getMap().addPolyline(getMapsActivityState().getEntregaPolyline());
                     }
 
                     try{
@@ -162,7 +162,7 @@ public class GPSservice extends Service {
                     }
 
                     for (MarkerOptions markerOptions: getMapsActivityState().getMarkers()) {
-                        Marker marker = getMap().addMarker(markerOptions);
+                        Marker marker = getMapsActivityState().getMap().addMarker(markerOptions);
                         marker.setTag("");
                     }
 
@@ -262,13 +262,13 @@ public class GPSservice extends Service {
         this.sharedPref = sharedPref;
     }
 
-    public GoogleMap getMap() {
-        return map;
-    }
-
-    public void setMap(GoogleMap map) {
-        this.map = map;
-    }
+//    public GoogleMap getMap() {
+//        return map;
+//    }
+//
+//    public void setMap(GoogleMap map) {
+//        this.map = map;
+//    }
 
     public FusedLocationProviderClient getmFusedLocationClient() {
         return mFusedLocationClient;
@@ -302,10 +302,11 @@ public class GPSservice extends Service {
         this.activity = activity;
     }
 
-    public void updateMap(GoogleMap map) {
-        map.addPolyline(this.getMapsActivityState().getRepartidorPolyline());
-        this.setMap(map);
-    }
+//    public void updateMap(GoogleMap map) {
+//        map.addPolyline(this.getMapsActivityState().getRepartidorPolyline());
+////        map.addPolyline(this.getMapsActivityState().getEntregaPolyline());
+//        this.setMap(map);
+//    }
 
 
     public MapsActivityState getMapsActivityState() {

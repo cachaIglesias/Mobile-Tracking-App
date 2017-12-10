@@ -75,11 +75,6 @@ public class Order extends Resource {
         this.valor = valor;
     }
 
-    @Override
-    public String toString(){
-       return direccion + "\n" + destinatario + "\n" + producto + "         " + valor;
-    }
-
     public Business getBusiness() {
         return business;
     }
@@ -150,6 +145,27 @@ public class Order extends Resource {
             ordered_products += order_product.getProduct().getName() + ", ";
         }
         return ordered_products;
+    }
+
+    @Override
+    public String toString(){
+        return direccion + "\n" + destinatario + "\n" + producto + "         " + valor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        Boolean result = true;
+
+        if (o.getClass() != this.getClass()) {
+            result = false;
+        }
+
+        if (((Order)o).getAddress().compareTo(this.getAddress()) != 0) {
+            result = false;
+        }
+
+        return result;
     }
 
 //    // Constructor to convert JSON object into a Java class instance

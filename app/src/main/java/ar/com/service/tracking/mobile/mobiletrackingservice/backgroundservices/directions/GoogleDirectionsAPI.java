@@ -40,13 +40,13 @@ public class GoogleDirectionsAPI {
 
     }
 
-    public void route(Business buesiness, OrderAdapter orderAdapter){
+    public void route(Business buesiness, List<Order> orders){
 
         LatLng origin;
         LatLng destination;
         LatLng[] ordersDestination;
 
-        this.addWaypoints(buesiness, orderAdapter);
+        this.addWaypoints(buesiness, orders);
 
         origin = waypoints.get(0);
         destination = waypoints.get(0);
@@ -61,6 +61,7 @@ public class GoogleDirectionsAPI {
         DirectionsApiRequest apiRequest = DirectionsApi.newRequest(apiContext);
         apiRequest.origin(origin);
         apiRequest.waypoints(ordersDestination);
+//        apiRequest.optimizeWaypoints(false);
         apiRequest.destination(destination);
         apiRequest.mode(TravelMode.DRIVING); //set travelling mode
 //                apiRequest.units(Unit.METRIC);
@@ -115,9 +116,9 @@ public class GoogleDirectionsAPI {
 
     }
 
-    private void addWaypoints(Business buesiness, OrderAdapter orderAdapter) {
+    private void addWaypoints(Business buesiness, List<Order> orders) {
         waypoints.add(new LatLng(buesiness.getPosition().getLatitude(), buesiness.getPosition().getLongitude()));
-        for (Order order: orderAdapter.getOrders()) {
+        for (Order order: orders) {
             waypoints.add(new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude()));
         }
     }

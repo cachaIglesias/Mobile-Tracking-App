@@ -37,8 +37,8 @@ public class GPSServiceConnection implements ServiceConnection {
         if(instance == null) {
             instance = new GPSServiceConnection(mapsActivityState, map, mapsActivity, context);
         }
-        if (instance.getMap() == null ){
-            instance.setMap(map);
+        if (instance.getMapsActivityState().getMap() == null ){
+            instance.getMapsActivityState().setMap(map);
         }
         if (instance.getMapsActivityState() == null ){
             instance.setMapsActivityState(mapsActivityState);
@@ -49,7 +49,7 @@ public class GPSServiceConnection implements ServiceConnection {
 
     public GPSServiceConnection(MapsActivityState mapsActivityState, GoogleMap map, MapsActivity mapsActivity, Context context) {
         this.setMapsActivityState(mapsActivityState);
-        this.setMap(map);
+//        this.setMap(map);
         this.setActivity(mapsActivity);
         this.setLastContext(context);
     }
@@ -59,7 +59,7 @@ public class GPSServiceConnection implements ServiceConnection {
         // We've bound to LocalService, cast the IBinder and get LocalService instance
         setBinder((GPSbinder) service);
         setmService(getBinder().getService());
-        getmService().setParameters(getMapsActivityState(), getMap(), this.getActivity());
+        getmService().setParameters(getMapsActivityState(), getMapsActivityState().getMap(), this.getActivity());
         setmBound(true);
 
         Log.w(TAG, "Conexion con servicio GPS background establecida");
@@ -120,13 +120,13 @@ public class GPSServiceConnection implements ServiceConnection {
         this.mBound = mBound;
     }
 
-    public GoogleMap getMap() {
-        return map;
-    }
-
-    public void setMap(GoogleMap map) {
-        this.map = map;
-    }
+//    public GoogleMap getMap() {
+//        return map;
+//    }
+//
+//    public void setMap(GoogleMap map) {
+//        this.map = map;
+//    }
 
     public Activity getActivity() {
         return activity;
@@ -145,12 +145,12 @@ public class GPSServiceConnection implements ServiceConnection {
         this.lastContext = lastContext;
     }
 
-    public void updateMap(GoogleMap map) {
-        this.setMap(map);
-        if(this.getmService() != null){
-            this.getmService().updateMap(map);
-        }
-    }
+//    public void updateMap(GoogleMap map) {
+//        this.setMap(map);
+//        if(this.getmService() != null){
+//            this.getmService().updateMap(map);
+//        }
+//    }
 
     public MapsActivityState getMapsActivityState() {
         return mapsActivityState;

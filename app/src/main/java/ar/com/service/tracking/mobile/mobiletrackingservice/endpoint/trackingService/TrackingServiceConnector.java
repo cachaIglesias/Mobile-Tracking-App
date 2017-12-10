@@ -74,14 +74,14 @@ public class TrackingServiceConnector {
 
     }
 
-    public void obtenerEntregaActiva(Integer deliveryManID, GoogleMap map, MapsActivityState mapsActivityState){
+    public void obtenerEntregaActiva(Integer deliveryManID, MapsActivityState mapsActivityState){
 
 //        setSharedPref( getSharedPreferences("SettingFile", MODE_PRIVATE));
 //                Long segundos = Long.valueOf(getSharedPref().getString("minTime", "3").split(" ")[0]);
 //        Float metros = Float.valueOf(getSharedPref().getString("minDist", "10").split(" ")[0]);
         // TODO > Geofence radio y distancia estan hardcodeados, se deberian obtener de la configuracion.
         GeofenceTransitionService geofenceTransitionService = GeofenceTransitionService.getInstance(this.getLastActivity(), 150, 3);
-        OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(map, mapsActivityState, geofenceTransitionService);
+        OrderTrackingServiceObserver orderObserver = new OrderTrackingServiceObserver(mapsActivityState, geofenceTransitionService);
         ResponseObject responseObject = new ResponseObject(getLastContext(), orderObserver);
         setCall(getService().getEntregaActiva(deliveryManID));
             // forma asincronica

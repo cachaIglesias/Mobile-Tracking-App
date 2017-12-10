@@ -108,4 +108,30 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         this.orders = orders;
     }
 
+    public List<Order> getSendedOrders(){
+
+        List<Order> sendedOrders = new LinkedList<Order>();
+
+        for (Order order: this.getOrders()) {
+            if(order.getStatus().compareTo("sended") == 0){
+                sendedOrders.add(order);
+            }
+        }
+
+        return sendedOrders;
+    }
+
+    public Boolean hasSendedOrders(){
+
+        Boolean result = false;
+
+        for (Order order: this.getOrders()) {
+            if(order.getStatus().compareTo("sended") == 0){
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
 }

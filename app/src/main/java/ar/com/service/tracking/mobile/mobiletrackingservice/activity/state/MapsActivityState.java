@@ -2,12 +2,14 @@ package ar.com.service.tracking.mobile.mobiletrackingservice.activity.state;
 
 import android.content.Context;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.Business;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.adapter.OrderAdapter;
 
@@ -26,6 +28,10 @@ public class MapsActivityState {
     private PolylineOptions entregaPolyline;
 
     private OrderAdapter orderAdapter;
+
+    private GoogleMap map;
+
+    private Business business;
 
     private String url = "http://10.0.2.2:3000/";
 
@@ -53,6 +59,13 @@ public class MapsActivityState {
 
     public void setMarkers(List<MarkerOptions> markers) {
         this.markers = markers;
+        this.refreshMarkers();
+    }
+
+    private void refreshMarkers() {
+        for (MarkerOptions markerOptions: this.getMarkers()) {
+            this.getMap().addMarker(markerOptions);
+        }
     }
 
     public OrderAdapter getOrderAdapter() {
@@ -69,6 +82,11 @@ public class MapsActivityState {
 
     public void setRepartidorPolyline(PolylineOptions repartidorPolyline) {
         this.repartidorPolyline = repartidorPolyline;
+        this.refreshRepartidorPolyline();
+    }
+
+    public void refreshRepartidorPolyline(){
+        this.getMap().addPolyline(this.getRepartidorPolyline());
     }
 
     public PolylineOptions getEntregaPolyline() {
@@ -77,6 +95,11 @@ public class MapsActivityState {
 
     public void setEntregaPolyline(PolylineOptions entregaPolyline) {
         this.entregaPolyline = entregaPolyline;
+        this.refreshEntregaPolyline();
+    }
+
+    public void refreshEntregaPolyline(){
+        this.getMap().addPolyline(this.getEntregaPolyline());
     }
 
     public String getUrl() {
@@ -93,5 +116,42 @@ public class MapsActivityState {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public GoogleMap getMap() {
+        return map;
+    }
+
+    public void setMap(GoogleMap map) {
+        this.map = map;
+        this.refreshMap();
+    }
+
+    public void refreshMap() {
+        this.getMap().clear();
+        if(this.getEntregaPolyline() != null){
+        this.getMap().addPolyline(this.getEntregaPolyline());}
+        if(this.getRepartidorPolyline() != null) {
+            this.getMap().addPolyline(this.getRepartidorPolyline());
+        }
+        for (MarkerOptions markerOptions: this.getMarkers()) {
+            this.getMap().addMarker(markerOptions);
+        }
+    }
+
+    public Business getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(Business business) {
+        this.business = business;
+    }
+
+    public void resetMapsActivityState() {
+        this.setMarkers(new LinkedList<MarkerOptions>() );
+        this.setEntregaPolyline(null);
+        this.setRepartidorPolyline(null);
+        this.setBusiness(null);
+        this.setOrderAdapter(null);
     }
 }
