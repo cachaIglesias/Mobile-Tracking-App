@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import ar.com.service.tracking.mobile.mobiletrackingservice.R;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.OrderProduct;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**
@@ -55,7 +57,7 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                 final TrackingServiceConnector instancia = TrackingServiceConnector.getInstance(getContext(), null);
 
                 String title = "Llegaste a destino !?";
-                String message = "Pudiste entregar la orden de " + order.printOrdered_products() + "a " + order.getDestinatario();
+                String message = "Pudiste entregar la orden de " + order.printOrdered_products() + ", a " + order.getCustomer_full_name();
 
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
 
@@ -99,14 +101,19 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         TextView destinoView = (TextView) convertView.findViewById(R.id.destino);
         TextView destinatarioView = (TextView) convertView.findViewById(R.id.destinatario);
         TextView productoView = (TextView) convertView.findViewById(R.id.producto);
-        TextView precioView = (TextView) convertView.findViewById(R.id.precio);
+        TextView estadoView = (TextView) convertView.findViewById(R.id.estado);
+//        TextView precioView = (TextView) convertView.findViewById(R.id.precio);
         // Populate the data into the template view using the data object
         destinoView.setText(order.getAddress());
-        destinatarioView.setText( order.getDestinatario());
+        destinatarioView.setText( order.getCustomer_full_name());
         productoView.setText(order.printOrdered_products());
-        if(order.getValor() != null){
-            precioView.setText(order.getValor().toString());
-        }
+        estadoView.setText(order.getStatus());
+//        Double precio = new Double("0.0");
+//        for (OrderProduct orderProduct: order.getOrdered_products()) {
+//            precio += orderProduct.getAmount();
+//        }
+//        precioView.setText(precio.toString());
+
         // Return the completed view to render on screen
         return convertView;
     }

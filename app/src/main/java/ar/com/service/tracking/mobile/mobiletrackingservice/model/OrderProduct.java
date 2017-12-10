@@ -13,8 +13,8 @@ import java.util.List;
 public class OrderProduct extends Resource {
 
     private Order order;
-    private  Product product;
-    private Float amount;
+    private Product product;
+    private Double amount;
 
     public OrderProduct(){}
 
@@ -34,11 +34,11 @@ public class OrderProduct extends Resource {
         this.product = product;
     }
 
-    public Float getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Float amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 }

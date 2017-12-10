@@ -27,6 +27,7 @@ public class Order extends Resource {
     private Date end_date;
     private String address;
     private String status;
+    private String customer_full_name;
 
     private Business business;
     private Position position;
@@ -131,6 +132,8 @@ public class Order extends Resource {
         this.status = status;
     }
 
+
+
     public List<OrderProduct> getOrdered_products() {
         return ordered_products;
     }
@@ -140,11 +143,11 @@ public class Order extends Resource {
     }
 
     public String printOrdered_products(){
-        String ordered_products = " ";
+        String ordered_products = "";
         for ( OrderProduct order_product : this.getOrdered_products() ) {
             ordered_products += order_product.getProduct().getName() + ", ";
         }
-        return ordered_products;
+        return ordered_products.subSequence(0, ordered_products.length()-2).toString();
     }
 
     @Override
@@ -166,6 +169,14 @@ public class Order extends Resource {
         }
 
         return result;
+    }
+
+    public String getCustomer_full_name() {
+        return customer_full_name;
+    }
+
+    public void setCustomer_full_name(String customer_full_name) {
+        this.customer_full_name = customer_full_name;
     }
 
 //    // Constructor to convert JSON object into a Java class instance

@@ -120,7 +120,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
                             MarkerOptions markerOptions = new MarkerOptions().position(position)
                                     .title(order.getAddress())
-                                    .snippet(order.getProducto() + " valor: " + order.getValor() + " cliente: " + order.getDestinatario() )
+                                    .snippet("Cliente: " + order.getCustomer_full_name())
                                     .alpha(0.7f);
                             if(order.getStatus().equalsIgnoreCase("canceled") || order.getStatus().equalsIgnoreCase("suspended")){
                                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_discarted));

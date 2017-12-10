@@ -36,14 +36,26 @@ android:orientation="vertical">
             android:textSize="16dip"
             android:textStyle="bold" />
 
+        <!--<TextView-->
+            <!--android:id="@+id/precio"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:paddingLeft="10dip"-->
+            <!--android:paddingBottom="7dip"-->
+            <!--android:textSize="16dip"-->
+            <!--android:textStyle="bold"-->
+            <!--/>-->
+
         <TextView
-            android:id="@+id/precio"
-            android:layout_width="wrap_content"
+            android:id="@+id/estado"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="10dip"
             android:paddingBottom="7dip"
             android:textSize="16dip"
             android:textStyle="bold"
+            android:gravity="right"
+            android:paddingRight="5dp"
             />
 
     </LinearLayout>
