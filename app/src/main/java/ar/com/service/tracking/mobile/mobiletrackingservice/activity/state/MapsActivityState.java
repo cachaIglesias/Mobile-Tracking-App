@@ -49,7 +49,7 @@ public class MapsActivityState {
     }
 
     public MapsActivityState(Context context){
-        this.setOrderAdapter(new OrderAdapter(context, new LinkedList<Order>()));
+        this.setOrderAdapter(new OrderAdapter(context, new LinkedList<Order>(), this));
     }
 
 
@@ -95,7 +95,7 @@ public class MapsActivityState {
 
     public void setEntregaPolyline(PolylineOptions entregaPolyline) {
         this.entregaPolyline = entregaPolyline;
-        this.refreshEntregaPolyline();
+//        this.refreshEntregaPolyline();
     }
 
     public void refreshEntregaPolyline(){
@@ -130,7 +130,19 @@ public class MapsActivityState {
     public void refreshMap() {
         this.getMap().clear();
         if(this.getEntregaPolyline() != null){
-        this.getMap().addPolyline(this.getEntregaPolyline());}
+        this.getMap().addPolyline(this.getEntregaPolyline());
+        }
+        if(this.getRepartidorPolyline() != null) {
+            this.getMap().addPolyline(this.getRepartidorPolyline());
+        }
+        for (MarkerOptions markerOptions: this.getMarkers()) {
+            this.getMap().addMarker(markerOptions);
+        }
+    }
+
+    public void cleanEntregaPolylineFromMap(){
+        this.getMap().clear();
+        this.setEntregaPolyline(null);
         if(this.getRepartidorPolyline() != null) {
             this.getMap().addPolyline(this.getRepartidorPolyline());
         }

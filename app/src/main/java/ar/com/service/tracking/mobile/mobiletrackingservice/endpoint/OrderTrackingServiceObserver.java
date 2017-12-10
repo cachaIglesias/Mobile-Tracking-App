@@ -154,14 +154,16 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
 
         if (notificar){
             // limpiar el mapa, cargar los markers destinos , sin perder el polyline!!!!
-            getMapsActivityState().getMap().clear();
-            getMapsActivityState().getMap().addPolyline(this.getMapsActivityState().getRepartidorPolyline());
-//            map.notify();
-//            this.getPolylineOptions().notify();
-            for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {
-                Marker marker = getMapsActivityState().getMap().addMarker(markerOptions);
-                marker.setTag("");
-            }
+//            getMapsActivityState().getMap().clear();
+//            getMapsActivityState().getMap().addPolyline(this.getMapsActivityState().getRepartidorPolyline());
+////            map.notify();
+////            this.getPolylineOptions().notify();
+//            for (MarkerOptions markerOptions: this.getMapsActivityState().getMarkers()) {
+//                Marker marker = getMapsActivityState().getMap().addMarker(markerOptions);
+//                marker.setTag("");
+//            }
+
+            getMapsActivityState().cleanEntregaPolylineFromMap();
 
             // se inicia el servicio de Geofencing
             this.getGeofenceTransitionService().startGeofencingMonitoring();

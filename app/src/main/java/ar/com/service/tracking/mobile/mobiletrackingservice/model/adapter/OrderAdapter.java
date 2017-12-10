@@ -10,10 +10,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
@@ -26,9 +29,12 @@ public class OrderAdapter extends ArrayAdapter<Order> {
 
     private List<Order> orders;
 
-    public OrderAdapter(Context context, LinkedList<Order> orders) {
+    private MapsActivityState mapsActivityState;
+
+    public OrderAdapter(Context context, LinkedList<Order> orders, MapsActivityState mapsActivityState) {
         super(context, 0, orders);
         this.setOrders(orders);
+        this.setMapsActivityState(mapsActivityState);
     }
 
     @Override
@@ -62,6 +68,8 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                                 MessageHelper.toast(getContext(), "Orden finalizada", Toast.LENGTH_SHORT);
                                 view.setBackgroundColor(0x7F00FF00);
                                 view.setEnabled(false);
+                                view.getNextFocusDownId();
+                                getMapsActivityState().getMarkers().get(position+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_finalized));
                             }
                         })
                         .setNegativeButton("No, cancelar orden", new DialogInterface.OnClickListener() {
@@ -71,6 +79,9 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                                 MessageHelper.toast(getContext(), "Orden canncelada", Toast.LENGTH_SHORT);
                                 view.setBackgroundColor(0x7FFF0000);
                                 view.setEnabled(false);
+                                view.getNextFocusDownId();
+                                getMapsActivityState().getMarkers().get(position+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_discarted));
+                                //TOOO > se deberia recalcular recorrido???? creeeeo que aca no porque no es un destino que se deberia saltear ya que el repartidor se encuentra en el mismo.
                             }
                         }).setNeutralButton("Regresar al mapa", new DialogInterface.OnClickListener(){
                             @Override
@@ -134,4 +145,12 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         return result;
     }
 
+
+    public MapsActivityState getMapsActivityState() {
+        return mapsActivityState;
+    }
+
+    public void setMapsActivityState(MapsActivityState mapsActivityState) {
+        this.mapsActivityState = mapsActivityState;
+    }
 }
