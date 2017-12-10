@@ -155,7 +155,7 @@ public class GPSservice extends Service {
                     try{
                         ArrayList<Position> positions = new ArrayList<Position>();
                         positions.add(new Position(latitudeGPS, longitudeGPS));
-                        TrackingServiceConnector.getInstance(GPSservice.this, null).nuevasPosiciones(3, positions);
+                        TrackingServiceConnector.getInstance(GPSservice.this, null).nuevasPosiciones(MapsActivityState.getInstance(null).getUserId(), positions);
                     }catch (Exception e){
                         Log.e(TAG, "No se pudo enviar una posicion GPS, Error: " + e.toString());
                         MessageHelper.toast(GPSservice.this, "No se pudo enviar una posicion GPS", Toast.LENGTH_SHORT);

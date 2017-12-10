@@ -28,8 +28,9 @@ public interface TrackingService {
     Class[] classes = { Business.class, Delivery.class, DeliveryMan.class, Order.class, Position.class, Trace.class, Product.class, OrderProduct.class};
 
     // mascara que identifica a LocalHost en Android > "http://10.0.2.2:3000/"
+    // ejemplo de ruta ngrok > "http://744ab52c.ngrok.io/"
     public static final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/")
+            .baseUrl(MapsActivityState.getInstance(null).getUrl())
             .addConverterFactory(JSONConverterFactory.create(classes))
             .build();
 

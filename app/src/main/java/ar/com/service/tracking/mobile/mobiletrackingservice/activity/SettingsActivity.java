@@ -1,24 +1,20 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.activity;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
-import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 
 public class SettingsActivity extends FragmentActivity implements AdapterView.OnItemSelectedListener {
 
@@ -31,10 +27,12 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        sharedPref = getSharedPreferences("SettingFile", MODE_PRIVATE);
+        this.setSharedPref(getSharedPreferences("SettingFile", MODE_PRIVATE));
 
         inicializarMinTimeSpinner();
         inicializarMinDistSpinner();
+        inicializarNgrokURL();
+        inicializarIdRepartidor();
 
         Log.i(TAG, "Inicio de la actividad: " + TAG) ;
 
@@ -115,6 +113,44 @@ public class SettingsActivity extends FragmentActivity implements AdapterView.On
 
         int lastSelection = this.getSharedPref().getInt("minDistSpinnerPosition", 0);
         spinner.setSelection( lastSelection );
+
+    }
+
+    private void inicializarNgrokURL() {
+        final EditText editText = (EditText) findViewById(R.id.ngrok_url);
+
+        MapsActivityState mapsActivityState = MapsActivityState.getInstance(null);
+
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                // getSharedPref().edit().putString("ngrokUrl", ((EditText) view).getText().toString() ).commit();
+                MapsActivityState.getInstance(null).setUrl(((EditText) view).getText().toString());
+                }
+            }
+        );
+
+        // String ngrokURL = this.getSharedPref().getString("ngrokUrl", "http://10.0.2.2:3000/");
+        editText.setText(mapsActivityState.getUrl());
+    }
+
+    private void inicializarIdRepartidor() {
+
+        final EditText editText = (EditText) findViewById(R.id.deliveryMan_id);
+
+        MapsActivityState mapsActivityState = MapsActivityState.getInstance(null);
+
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                // getSharedPref().edit().putString("ngrokUrl", ((EditText) view).getText().toString() ).commit();
+                MapsActivityState.getInstance(null).setUserId(Integer.parseInt(((EditText) view).getText().toString()));
+                }
+            }
+        );
+
+        // int ngrokURL = this.getSharedPref().getInt("deliveryManID", "http://10.0.2.2:3000/");
+        editText.setText(mapsActivityState.getUserId().toString());
 
     }
 

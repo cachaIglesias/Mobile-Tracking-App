@@ -11,5 +11,10 @@
     <integer name="mapZoom">10</integer>
     <integer name="minTimePositionRefresh">200</integer>
     <integer name="minDistancePositionRefresh">10</integer>
+
+    <string name="ngrok_url_text">URL Ngrok</string>
+    <string name="deliveryMan_id_text">ID de repartidor</string>
+
     <!-- TODO > pasar strings aca ! -->
+
 </resources>

@@ -306,7 +306,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
 
             try{
-                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(3, this.getMap(), getMapsActivityState());
+                TrackingServiceConnector.getInstance(MapsActivity.this, this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), this.getMap(), getMapsActivityState());
             }catch (Exception e){
                 Log.e(TAG, "No se pudo recuperar una entrega activa");
                 MessageHelper.toast(this, "No se pudo recuperar una entrega activa", Toast.LENGTH_SHORT);
@@ -342,7 +342,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run() {
                         try {
                             //Ejecuta tu AsyncTask!
-                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(3, getMap(), getMapsActivityState());
+                            TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), getMap(), getMapsActivityState());
                         } catch (Exception e) {
                             Log.e(TAG, "No se pudo recuperar una entrega activa cada 1 minuto" + e.getMessage());
                             MessageHelper.toast(MapsActivity.this, "No se pudo recuperar una entrega activa, en 1 minuto se volverá a intentar", Toast.LENGTH_LONG);

@@ -27,6 +27,10 @@ public class MapsActivityState {
 
     private OrderAdapter orderAdapter;
 
+    private String url = "http://10.0.2.2:3000/";
+
+    private Integer userId = 1;
+
     private static MapsActivityState instance = null;
 
     public static MapsActivityState getInstance(Context context) {
@@ -73,5 +77,21 @@ public class MapsActivityState {
 
     public void setEntregaPolyline(PolylineOptions entregaPolyline) {
         this.entregaPolyline = entregaPolyline;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }
