@@ -17,10 +17,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ar.com.service.tracking.mobile.mobiletrackingservice.R;
+import ar.com.service.tracking.mobile.mobiletrackingservice.activity.MapsActivity;
 import ar.com.service.tracking.mobile.mobiletrackingservice.activity.state.MapsActivityState;
 import ar.com.service.tracking.mobile.mobiletrackingservice.endpoint.trackingService.TrackingServiceConnector;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.Order;
 import ar.com.service.tracking.mobile.mobiletrackingservice.model.OrderProduct;
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.enums.StatusEnum;
 import ar.com.service.tracking.mobile.mobiletrackingservice.utils.MessageHelper;
 
 /**
@@ -70,19 +72,27 @@ public class OrderAdapter extends ArrayAdapter<Order> {
                                 MessageHelper.toast(getContext(), "Orden finalizada", Toast.LENGTH_SHORT);
                                 view.setBackgroundColor(0x7F00FF00);
                                 view.setEnabled(false);
+                                TextView estadoView = (TextView) view.findViewById(R.id.estado);
+                                estadoView.setText(StatusEnum.Finalizado.toString());
+                                order.setStatus("finalized");
                                 view.getNextFocusDownId();
                                 getMapsActivityState().getMarkers().get(position+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_finalized));
+                                getMapsActivityState().refreshMap();
                             }
                         })
                         .setNegativeButton("No, cancelar orden", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                                 instancia.marcarComoCancelado(Integer.parseInt(order.getId()));
-                                MessageHelper.toast(getContext(), "Orden canncelada", Toast.LENGTH_SHORT);
+                                MessageHelper.toast(getContext(), "Orden cancelada", Toast.LENGTH_SHORT);
                                 view.setBackgroundColor(0x7FFF0000);
                                 view.setEnabled(false);
+                                order.setStatus("canceled");
+                                TextView estadoView = (TextView) view.findViewById(R.id.estado);
+                                estadoView.setText(StatusEnum.Cancelado.toString());
                                 view.getNextFocusDownId();
                                 getMapsActivityState().getMarkers().get(position+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_discarted));
+                                getMapsActivityState().refreshMap();
                                 //TOOO > se deberia recalcular recorrido???? creeeeo que aca no porque no es un destino que se deberia saltear ya que el repartidor se encuentra en el mismo.
                             }
                         }).setNeutralButton("Regresar al mapa", new DialogInterface.OnClickListener(){
@@ -107,7 +117,19 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         destinoView.setText(order.getAddress());
         destinatarioView.setText( order.getCustomer_full_name());
         productoView.setText(order.printOrdered_products());
-        estadoView.setText(order.getStatus());
+        estadoView.setText(order.getStatusAsEnum().toString());
+
+        if(order.getStatus().equalsIgnoreCase("canceled") || order.getStatus().equalsIgnoreCase("suspended")){
+            convertView.setBackgroundColor(0x7FFF0000);
+            convertView.setEnabled(false);
+        }else{
+            if(order.getStatus().equalsIgnoreCase("finalized")){
+                convertView.setBackgroundColor(0x7F00FF00);
+                convertView.setEnabled(false);
+            }else{
+                // TODO > creo que se deberia poner gris y habilitarse para el caso en que una orden estaba en estado suspendido y pase a estar en estado enviado.
+            }
+        }
 //        Double precio = new Double("0.0");
 //        for (OrderProduct orderProduct: order.getOrdered_products()) {
 //            precio += orderProduct.getAmount();
@@ -126,17 +148,17 @@ public class OrderAdapter extends ArrayAdapter<Order> {
         this.orders = orders;
     }
 
-    public List<Order> getSendedOrders(){
+    public List<Order> getSendedAndFinalizedOrders(){
 
-        List<Order> sendedOrders = new LinkedList<Order>();
+        List<Order> sendedAndFinalizedOrders = new LinkedList<Order>();
 
         for (Order order: this.getOrders()) {
-            if(order.getStatus().compareTo("sended") == 0){
-                sendedOrders.add(order);
+            if(order.getStatus().compareTo("sended") == 0 || order.getStatus().compareTo("finalized") == 0){
+                sendedAndFinalizedOrders.add(order);
             }
         }
 
-        return sendedOrders;
+        return sendedAndFinalizedOrders;
     }
 
     public Boolean hasSendedOrders(){

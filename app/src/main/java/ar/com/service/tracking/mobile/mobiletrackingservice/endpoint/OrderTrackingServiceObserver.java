@@ -85,6 +85,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                         if (cambioDeEstado) {
 
                             adapterOrders.get(orderIndex).setStatus(order.getStatus());
+                            this.getMapsActivityState().getOrderAdapter().notifyDataSetChanged();
                             Log.w(TAG, "Se modificó el estado de la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
 
 //                            LatLng position = new LatLng(order.getPosition().getLatitude(), order.getPosition().getLongitude());
@@ -97,11 +98,13 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                              */
                             if(order.getStatus().equalsIgnoreCase("canceled") || order.getStatus().equalsIgnoreCase("suspended")){
                                 this.getMapsActivityState().getMarkers().get(orderIndex+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_discarted));
+                                notificar = true;
                             }else{
                                 if(order.getStatus().equalsIgnoreCase("finalized")){
                                     this.getMapsActivityState().getMarkers().get(orderIndex+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_finalized));
                                 }else{
                                     this.getMapsActivityState().getMarkers().get(orderIndex+1).icon(BitmapDescriptorFactory.fromResource(R.drawable.destination));
+                                    notificar = true;
                                 }
                             }
                             Log.w(TAG, "Se modificó el marcador de la orden: " + order.toString() + " | " + " De la posicion: " + orderIndex);
@@ -109,7 +112,6 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             // TODO > remover GEOFENCE de la orden eliminada.
                             // Log.w(TAG, "Se removió el Geofence de la orden: " + order.toString() );
 
-                            notificar = true;
                         }
                     } else {
 //                        if (!esUnEstadoFinal) {
@@ -128,6 +130,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
                             else{
                                 if(order.getStatus().equalsIgnoreCase("finalized")){
                                     markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_finalized));
+                                    getMapsActivityState().refreshMap();
                                 }
                                 else{
                                     markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.destination));
@@ -171,7 +174,7 @@ public class OrderTrackingServiceObserver extends AbstractTrackingServiceObserve
             // se arma el recorrido
             GoogleDirectionsAPIObserver googleDirectionsAPIObserver = new GoogleDirectionsAPIObserver(this.getMapsActivityState());
             GoogleDirectionsAPI googleDirectionsAPI = new GoogleDirectionsAPI(this.getMapsActivityState().getOrderAdapter().getContext(), googleDirectionsAPIObserver);
-            googleDirectionsAPI.route(this.getMapsActivityState().getBusiness(), this.getMapsActivityState().getOrderAdapter().getSendedOrders());
+            googleDirectionsAPI.route(this.getMapsActivityState().getBusiness(), this.getMapsActivityState().getOrderAdapter().getSendedAndFinalizedOrders());
 
             Log.i(TAG, "Recorrido del repartidor actualizado");
             MessageHelper.showOnlyAlert(this.getGeofenceTransitionService().getActivity(), "Atencion!", "Se actualizó la lista de ordenes, por lo tanto el recorrido sugerido tambien será actualizado." );

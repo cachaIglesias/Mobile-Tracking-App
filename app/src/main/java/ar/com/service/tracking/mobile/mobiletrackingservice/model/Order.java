@@ -7,6 +7,8 @@ import com.gustavofao.jsonapi.Models.Resource;
 import java.util.Date;
 import java.util.List;
 
+import ar.com.service.tracking.mobile.mobiletrackingservice.model.enums.StatusEnum;
+
 /**
  * Created by miglesias on 08/07/17.
  */
@@ -132,7 +134,20 @@ public class Order extends Resource {
         this.status = status;
     }
 
-
+    public StatusEnum getStatusAsEnum(){
+        switch (this.getStatus()) {
+            case "sended":
+                return StatusEnum.Enviado;
+            case "suspended":
+                return StatusEnum.Suspendido;
+            case "finalized":
+                return StatusEnum.Finalizado;
+            case "canceled":
+                return StatusEnum.Cancelado;
+            default:
+                return null;
+        }
+    }
 
     public List<OrderProduct> getOrdered_products() {
         return ordered_products;
