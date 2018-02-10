@@ -1,5 +1,6 @@
 package ar.com.service.tracking.mobile.mobiletrackingservice.activity.state;
 
+import android.app.Application;
 import android.content.Context;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -86,7 +87,9 @@ public class MapsActivityState {
     }
 
     public void refreshRepartidorPolyline(){
-        this.getMap().addPolyline(this.getRepartidorPolyline());
+        if(this.getRepartidorPolyline() != null ){
+            this.getMap().addPolyline(this.getRepartidorPolyline());
+        }
     }
 
     public PolylineOptions getEntregaPolyline() {
@@ -159,11 +162,11 @@ public class MapsActivityState {
         this.business = business;
     }
 
-    public void resetMapsActivityState() {
+    public void resetMapsActivityState(Context context) {
         this.setMarkers(new LinkedList<MarkerOptions>() );
         this.setEntregaPolyline(null);
         this.setRepartidorPolyline(null);
         this.setBusiness(null);
-        this.setOrderAdapter(null);
+        this.setOrderAdapter(new OrderAdapter(context, new LinkedList<Order>(), this));
     }
 }

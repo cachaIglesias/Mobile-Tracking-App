@@ -297,7 +297,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // detengo la solucitud de entregas activas cada 1 minuto
                 this.cancelarObtencionDeEntregaActivaCadaUnMinuto();
 
-               getMapsActivityState().resetMapsActivityState();
+               getMapsActivityState().resetMapsActivityState(this);
 
                 button.setText(R.string.deliver);
            }else{
@@ -343,6 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run() {
                         try {
                             //Ejecuta tu AsyncTask!
+                            // TODO > esto se descomento para el video, pero no se porque estaba comentado, tal vez para que no se realice el refrezco cada 1 minuto mientra debagueaba, porque se poner re denso
                             TrackingServiceConnector.getInstance(MapsActivity.this, MapsActivity.this).obtenerEntregaActiva(MapsActivityState.getInstance(null).getUserId(), getMapsActivityState());
                         } catch (Exception e) {
                             Log.e(TAG, "No se pudo recuperar una entrega activa cada 1 minuto" + e.getMessage());
@@ -360,8 +361,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             this.getTimer().cancel();
             this.setTimer(new Timer());
         }
-
-        this.getTimer().schedule(task, 60000, 60000);
+// TODO> se cambio a 30 segundos , antes estaba en 1 minuto
+        this.getTimer().schedule(task, 30000, 30000);
     }
 
     private void cancelarObtencionDeEntregaActivaCadaUnMinuto() {
